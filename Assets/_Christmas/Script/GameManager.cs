@@ -19,7 +19,7 @@ namespace MoNo.Christmas {
 	{
 		BeforeStart,
 		Going,
-		Presenting,
+		AfterGoal,
 		Result,
 		GameOver,
 		nothing,
@@ -29,7 +29,6 @@ namespace MoNo.Christmas {
 	{
 		public GameProgressStateReactiveProperty() { }
 		public GameProgressStateReactiveProperty(GameProgressState initialValue) : base(initialValue) { }
-
 	}
 
 	public class GameManager : SingletonMonoBehaviour<GameManager>
@@ -48,9 +47,7 @@ namespace MoNo.Christmas {
 		[Header("System object")]
 		// field
 		GameProgressStateReactiveProperty _gameProgressState = new GameProgressStateReactiveProperty(GameProgressState.nothing);
-		[SerializeField] CapsuleCollider _triggerCollider;
-		[SerializeField] GameObject _camStopperPref;
-		[SerializeField] List<Transform> _camStopperPosList;
+		Collider _triggerCollider;
 
 		//[Header("UI object")]
 		//[SerializeField] Canvas _startCanvas;
@@ -80,6 +77,7 @@ namespace MoNo.Christmas {
 			DOTween.SetTweensCapacity(1500, 50);
 
 			_gameProgressState.Value = GameProgressState.BeforeStart;
+			_triggerCollider = _player.triggerCollider.GetComponent<Collider>();
 
 			_gameProgressState
 				.Where(state => state == GameProgressState.BeforeStart)
@@ -99,11 +97,11 @@ namespace MoNo.Christmas {
 
 
 			_gameProgressState
-			  .Where(state => state == GameProgressState.Presenting)
+			  .Where(state => state == GameProgressState.AfterGoal)
 			  .Subscribe(state =>
 			  {
-				  OnPresenting();
-				  Debug.Log("presenting");
+				  OnAfterGoal();
+				  Debug.Log("AfterGoal");
 			  });
 
 
@@ -129,6 +127,7 @@ namespace MoNo.Christmas {
 
 		void OnBeforeStart(){}
 
+
 		void OnGoing()
 		{
 			//goingCanvas.gameObject.SetActive(true);
@@ -137,7 +136,7 @@ namespace MoNo.Christmas {
 			_player.Move();
 
 
-			_itemManager.currentItemNum
+			_player.chain.SnowBalls.ObserveCountChanged()
 				.Skip(1)
 				.Subscribe(i =>
 				{
@@ -154,13 +153,13 @@ namespace MoNo.Christmas {
 				 {
 					 if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
 					 {
-						 int num = obstacle.Event(_itemManager.currentItemNum.Value);
+						 int num = obstacle.Event(_player.chain.SnowBalls.Count);
 								//var addPinText = Instantiate(addPinPref, goingCanvas.gameObject.transform);
 						 if (num > 0)
 						 {
 							 for (int i = 0; i < num; i++)
 							 {
-								 _itemManager.GenerateItem(_itemManager.transform.position + new Vector3(0, 0, -2), _itemManager.transform);
+								 _player.SpawnSnowBall();
 							 }
 									//addPinText.text = $"+" + num.ToString();
 								}
@@ -168,7 +167,7 @@ namespace MoNo.Christmas {
 						 {
 							 for (int i = 0; i < -num; i++)
 							 {
-								 _itemManager.DeleteItem();
+								 _player.DeleteSnowBall();
 							 }
 									//addPinText.text = num.ToString();
 						 }
@@ -181,7 +180,21 @@ namespace MoNo.Christmas {
 					 }
 				 }).AddTo(_triggerCollider).AddTo(this);
 
+			_triggerCollider.OnTriggerEnterAsObservable()
+				.Where(col => col.CompareTag("TransformMode"))
+				.Subscribe(col =>
+				{
+					_player.chain.mode.Value = ChainSnowBall.ProcessMode.Transform;
+				});
 
+			_triggerCollider.OnTriggerEnterAsObservable()
+				.Where(col => col.CompareTag("DeltaMode"))
+				.Subscribe(col =>
+				{
+					_player.chain.mode.Value = ChainSnowBall.ProcessMode.Delta;
+				});
+
+			
 
 		  
 
@@ -190,27 +203,19 @@ namespace MoNo.Christmas {
 				.Where(trrigerObj => trrigerObj.CompareTag("GoalFlag"))
 				.Subscribe(triggerObj =>
 				{
-					_gameProgressState.Value = GameProgressState.Presenting;
+					_gameProgressState.Value = GameProgressState.AfterGoal;
 					
 				}).AddTo(_triggerCollider).AddTo(this);
 		}
 
-		void OnPresenting()
+		void OnAfterGoal()
 		{
-
-			// move
-			_player.Move();
 
 			//goingCanvas.gameObject.SetActive(false);
 			//bowlingCanvas.gameObject.SetActive(true);
-
-
-	
-
 			//multiplyRateText.text = $"x{multiplyRateCriterion[multiplyRate]}";
 
-			Vector3 camStopperPos = _camStopperPosList[_multiplyRate].position;
-			Instantiate(_camStopperPref, camStopperPos, Quaternion.identity);
+			var camStopperPos = Vector3.zero;
 			Instantiate(_confettiPref, camStopperPos + new Vector3(-4, 0, 5), Quaternion.Euler(-45, 90, 0));
 			Instantiate(_confettiPref, camStopperPos + new Vector3(4, 0, 5), Quaternion.Euler(-45, -90, 0));
 
@@ -236,7 +241,6 @@ namespace MoNo.Christmas {
 		{
 			//bowlingCanvas.gameObject.SetActive(false);
 
-			var resultScoreCount = _itemManager.finalItemsNum;
 			//resultCanvas.gameObject.SetActive(true);
 			//if (LoadData.I.isShowAd == true)
 			//{

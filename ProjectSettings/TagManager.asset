@@ -9,6 +9,9 @@ TagManager:
   - Pin
   - Snow
   - Magma
+  - Disappear
+  - DeltaMode
+  - TransformMode
   layers:
   - Default
   - TransparentFX

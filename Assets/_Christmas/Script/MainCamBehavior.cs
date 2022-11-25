@@ -32,7 +32,6 @@ namespace MoNo.Christmas
         void Start()
         {
             GameManager.I.gameProgressState
-                .Where(state => state == GameProgressState.Presenting)
                 .Subscribe(state =>
                 {
 

@@ -9,6 +9,10 @@ using UniRx.Diagnostics;
 
 public class SnowBallBehavior : MonoBehaviour
 {
+	[SerializeField] Rigidbody rb;
+	[SerializeField] SphereCollider collider;
+	[SerializeField] ParticleSystem meltingSnowPref;
+
 	public IReadOnlyReactiveProperty<float> Radius => radius;
 	ReactiveProperty<float> radius = new ReactiveProperty<float>(1f);
 
@@ -18,9 +22,12 @@ public class SnowBallBehavior : MonoBehaviour
 	[SerializeField] Vector2 _endPoint = new Vector2(-4, 4);
 	[SerializeField] float sphereRotateSpeed = 1f;
 
+	bool canChangeSize = true;
+	IDisposable disposableChangeSize;
+
 	const float radiusCriterion = 0.25f;
-	const float ballSizeIncreaseUnit = 0.2f;
-	const float ballSizeDecreaseUnit = -0.5f;
+	const float ballSizeIncreaseUnit = 0.5f;
+	const float ballSizeDecreaseUnit = -0.8f;
 
 	void Start()
 	{
@@ -30,33 +37,49 @@ public class SnowBallBehavior : MonoBehaviour
 			.Where(_radius => _radius < radiusCriterion)
 			.Subscribe(_radius =>
 			{
-				OnDestroy();
-			});
+				Destroy(this.gameObject);
+			}).AddTo(this);
 
+		// Snow & Magma
 		this.OnTriggerEnterAsObservable()
 			.Where(collider => collider.CompareTag("Snow"))
-			.Subscribe(_ => Debug.Log("Enter Snow Zone"));
+			.Subscribe(_ => {
+				//ChangeSphereSize(ballSizeIncreaseUnit);
+				Debug.Log("Enter Snow Zone"); }).AddTo(this);
 
 		this.OnTriggerEnterAsObservable()
 			.Where(collider => collider.CompareTag("Magma"))
-			.Subscribe(_ => Debug.Log("Enter Magma Zone"));
+			.Subscribe(_ => {
+				//ChangeSphereSize(ballSizeDecreaseUnit);
+				Debug.Log("Enter Magma Zone"); }).AddTo(this);
 
 		this.OnTriggerStayAsObservable()
 			.Where(collider => collider.CompareTag("Snow"))
-			.Subscribe(_ => ChangeSphereSize(ballSizeIncreaseUnit));
+			.BatchFrame(1, FrameCountType.Update)
+			.Subscribe(_ => ChangeSphereSize(ballSizeIncreaseUnit)).AddTo(this);
 
 		this.OnTriggerStayAsObservable()
 			.Where(collider => collider.CompareTag("Magma"))
-			.Subscribe(_ => ChangeSphereSize(ballSizeDecreaseUnit));
+			.BatchFrame(1, FrameCountType.Update)
+			.Subscribe(_ => ChangeSphereSize(ballSizeDecreaseUnit)).AddTo(this);
 
 		this.OnTriggerExitAsObservable()
 			.Where(collider => collider.CompareTag("Snow"))
-			.Subscribe(_ => Debug.Log("Exit Snow Zone"));
+			.Subscribe(_ => {
+				//FinishChangeSize();
+				Debug.Log("Exit Snow Zone"); }).AddTo(this);
 
 		this.OnTriggerExitAsObservable()
 			.Where(collider => collider.CompareTag("Magma"))
-			.Subscribe(_ => Debug.Log("Exit Magma Zone"));
+			.Subscribe(_ => {
+				//FinishChangeSize();
+				Debug.Log("Exit Magma Zone");
+			}).AddTo(this);
 
+		// Disapper this gameobject, entering the "disappear zone"
+		this.OnTriggerEnterAsObservable()
+		.Where(collider => collider.CompareTag("Disappear"))
+		.Subscribe(_ => Destroy(this.gameObject)).AddTo(this);
 
 	}
 
@@ -78,6 +101,14 @@ public class SnowBallBehavior : MonoBehaviour
 		RotateBall();
 	}
 
+	public void FixedUpdateTransPos(Vector3 transformPos)
+	{
+		var newPos = new Vector3(transformPos.x, transformPos.y + radius.Value, transformPos.z);
+		this.transform.position = newPos;
+
+		RotateBall();
+	}
+
 	void RotateBall()
 	{
 
@@ -88,21 +119,39 @@ public class SnowBallBehavior : MonoBehaviour
 
 	public void ChangeSphereSize(float unit)
 	{
+		//if (disposableChangeSize == null)
+		//{
+		//	disposableChangeSize = this.FixedUpdateAsObservable()
+		//		.Subscribe(_ =>
+		//		{
+					
+		//		});
+		//}
 		float multiplyTime = unit * Time.fixedDeltaTime;
-		this.transform.DOBlendableScaleBy(new Vector3(multiplyTime, multiplyTime, multiplyTime), 0);
+		this.transform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
 		radius.Value = this.transform.localScale.x / 2;
+		var meltingSnow = Instantiate(meltingSnowPref, this.transform.position, Quaternion.identity);
+		meltingSnow.Play();
+	}
+
+	void FinishChangeSize()
+	{
+		disposableChangeSize?.Dispose();
+		disposableChangeSize = null;
 	}
 
 
+	public void AddPos(Vector3 vector3)
+	{
+		this.transform.position += vector3;
+	}
 
 	private void OnDestroy()
 	{
-		radius.Dispose();
-
 		onDestroyAsync.OnNext(Unit.Default);
 		onDestroyAsync.OnCompleted();
 		onDestroyAsync.Dispose();
-
+		Debug.Log("Destroy: " + gameObject.name);
 	}
 
 }

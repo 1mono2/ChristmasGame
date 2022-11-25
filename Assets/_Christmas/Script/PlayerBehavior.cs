@@ -15,9 +15,10 @@ namespace MoNo.Christmas
 	{
 		[SerializeField] SnowBallBehavior snowBallPref;
 		[SerializeField] SnowBallBehavior[] snowBalls;
-		[SerializeField] ChaseCamera cam;
+		[SerializeField] ChaseTarget cam;
+		[SerializeField] public ChaseTarget triggerCollider;
 
-		ChainSnowBall chain;
+		public ChainSnowBall chain;
 
 		[Header("Move property")]
 		[SerializeField] float _damping = 10f;
@@ -33,30 +34,46 @@ namespace MoNo.Christmas
 		{
 			lean.OnDelta.AddListener(MoveHorizontal);
 
-			chain = new ChainSnowBall(snowBalls);
+			chain = new ChainSnowBall(ChainSnowBall.ProcessMode.Transform,snowBalls);
 			chain.SnowBalls
 				.ObserveCountChanged()
 				.Subscribe(count =>
 				{
 					SetCamera();
-				});
+					SetTriggerCollider();
+				}).AddTo(this);
 
 			SetCamera();
-
+			SetTriggerCollider();
 		}
 
 		public void SpawnSnowBall()
 		{
-			var spawnPos = snowBalls[chain.SnowBalls.Count - 1].transform.position + Vector3.back;
+			var spawnPos = chain.SnowBalls[chain.SnowBalls.Count - 1].transform.position;
 			var spawnedSnowball = Instantiate(snowBallPref, spawnPos, Quaternion.identity, this.transform.parent);
 			chain.Append(spawnedSnowball);
+		}
+
+		public void DeleteSnowBall()
+		{
+			Destroy(chain.LatestSnowBall());
+		}
+
+		void SetTriggerCollider()
+		{
+			var latestIndex = chain.SnowBalls.Count - 1;
+			if (latestIndex < 0) return;
+			var headSnowBall = chain.SnowBalls[latestIndex].gameObject;
+			triggerCollider.SetTarget(headSnowBall);
+			triggerCollider.StartChase();
 		}
 
 		void SetCamera()
 		{
 			var latestIndex = chain.SnowBalls.Count - 1;
-			var headSnowBall = chain.SnowBalls[latestIndex];
-			cam?.SetTarget(headSnowBall.gameObject);
+			if (latestIndex < 0) return;
+			var headSnowBall = chain.SnowBalls[latestIndex].gameObject;
+			cam?.SetTarget(headSnowBall);
 			cam?.StartChase();
 		}
 
@@ -127,72 +144,148 @@ namespace MoNo.Christmas
 
 	public sealed class ChainSnowBall
 	{
+		public enum ProcessMode {
+			Transform,
+			Delta,
+		}
+		public class ProcessModeReactiveProperty : ReactiveProperty<ProcessMode>
+		{
+			public ProcessModeReactiveProperty() { }
+			public ProcessModeReactiveProperty(ProcessMode initialValue) : base(initialValue) { }
+
+		}
+		public ProcessModeReactiveProperty mode = new ProcessModeReactiveProperty();
+
 		public IReadOnlyReactiveCollection<SnowBallBehavior> SnowBalls => snowBalls;
 		ReactiveCollection<SnowBallBehavior> snowBalls = new ReactiveCollection<SnowBallBehavior>();
-		readonly List<Vector3> finalDeltaPosList = new List<Vector3>() {Vector3.zero }; //  enter initialized value
+		readonly List<Vector3> deltaPosList = new List<Vector3>() {Vector3.zero }; //  enter initialized value
+		readonly List<Vector3> firstObjPosList = new List<Vector3>() { Vector3.zero };
 
 		int frameDiff = 5;
 
-		public ChainSnowBall(IEnumerable<SnowBallBehavior> snowBalls)
+		public ChainSnowBall(ProcessMode mode ,IEnumerable<SnowBallBehavior> snowBalls)
 		{
 			foreach(var snowBall in snowBalls)
 			{
-				Append(snowBall);
-
+				Append(snowBall);	
 			}
+
+			SubscribeMode();
+			this.mode.Value = mode;
 
 			// fixed postion before every update.
 			FixedUpdate();
-
 		}
 
-		public ChainSnowBall(){}
+		public ChainSnowBall(ProcessMode mode)
+		{
+			SubscribeMode();
+			this.mode.Value = mode;
+		}
 
 
 		public void FixedUpdate()
 		{
 			int frame = 1;
-			for(int i = snowBalls.Count -1; i >= 0 ; i--) // Reverse
-			{
-				Vector3 deltaPos;
-				if (finalDeltaPosList.Count - frame >= 0)
-				{
-					deltaPos = finalDeltaPosList[finalDeltaPosList.Count - frame];
-				}
-				else if(finalDeltaPosList.Any())
-				{
-					deltaPos = finalDeltaPosList[0];
-				}
-				else
-				{
-					deltaPos = Vector3.zero;
-				}
-				snowBalls[i].FixedUpdatePosition(deltaPos);
 
-				// update
+			// controlling first snowball via delta mode restrictly.
+			if (deltaPosList.Count - frame >= 0)
+			{
+				int index = deltaPosList.Count - 1;
+				Vector3 deltaPos = deltaPosList[index];
+
+				SnowBallBehavior latestSnowball = snowBalls[snowBalls.Count - 1];
+				latestSnowball.FixedUpdatePosition(deltaPos);
+				firstObjPosList.Add(latestSnowball.transform.position - new Vector3(0, latestSnowball.Radius.Value, 0));
 				frame += frameDiff;
 			}
+
+			// after second snowball
+			switch (mode.Value)
+			{
+				case ProcessMode.Transform:
+					for (int i = snowBalls.Count - 2; i >= 0; i--) // Reverse. From foreword snowball
+					{
+						Vector3 pos;
+						if (firstObjPosList.Count - frame >= 0)
+						{
+							int index = firstObjPosList.Count - frame;
+							pos = firstObjPosList[index];
+						}
+						else if (deltaPosList.Any())
+						{
+							pos = deltaPosList[0];
+						}
+						else
+						{
+							pos = Vector3.zero;
+						}
+						snowBalls[i].FixedUpdateTransPos(pos);
+
+						// update
+						frame += frameDiff;
+					}
+
+					break;
+
+				case ProcessMode.Delta:
+					for (int i = snowBalls.Count - 2; i >= 0; i--) // Reverse
+					{
+						Vector3 deltaPos;
+						if (deltaPosList.Count - frame >= 0)
+						{
+							deltaPos = deltaPosList[deltaPosList.Count - frame];
+						}
+						else if (deltaPosList.Any())
+						{
+							deltaPos = deltaPosList[0];
+						}
+						else
+						{
+							deltaPos = Vector3.zero;
+						}
+						snowBalls[i].FixedUpdatePosition(deltaPos);
+
+						// update
+						frame += frameDiff;
+					}
+					break;
+			}
+			
 		}
 
-		public void Append(SnowBallBehavior snowBall)
+		public void Append(SnowBallBehavior currentSnowBall)
 		{
-			snowBall.OnDestroyAsync
+
+			// When snowball destroyed, it's removed from Snowballs List
+			currentSnowBall.OnDestroyAsync
 				.Subscribe(_ =>
 				{
-					snowBalls.Remove(snowBall);
-				});
-			snowBalls.Add(snowBall);
+					snowBalls.Remove(currentSnowBall);
+				}).AddTo(currentSnowBall);
+			snowBalls.Add(currentSnowBall);
 		}
 
-		public void EffectAll()
+		public GameObject LatestSnowBall()
 		{
-
+			return snowBalls[snowBalls.Count - 1].gameObject;
 		}
 
 		public void AddToPositionList(Vector3 vector3)
 		{
-			if (finalDeltaPosList.Count > 100) finalDeltaPosList.Pop();
-			finalDeltaPosList.Add(vector3);
+			if (deltaPosList.Count > 100) deltaPosList.Pop();
+			deltaPosList.Add(vector3);
+		}
+
+		void SubscribeMode()
+		{
+			this.mode
+			.Where(mode => mode == ProcessMode.Transform)
+			.Subscribe(_ => { Debug.Log("Switch Transform mode"); });
+
+			this.mode
+				.Where(mode => mode == ProcessMode.Delta)
+				.Subscribe(_ => { Debug.Log("Switch Delta mode"); });
 		}
 
 	}
