@@ -54,7 +54,13 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+/[Bb]uild/
+/[Bb]uilds/
 
 # Crashlytics generated file
-crashlytics-build.properties
+crashlytics-build.propertiess
 
+# Recording File
+*.mp4
+/[Rr]ecording/
+/[Rr]ecordings/
