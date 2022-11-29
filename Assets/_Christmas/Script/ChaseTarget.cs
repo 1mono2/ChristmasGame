@@ -13,11 +13,7 @@ namespace MoNo.Christmas
 		GameObject target;
 		Vector3 diff = Vector3.zero;
 		IDisposable disposableChase;
-
-		private void Start()
-		{
-
-		}
+		
 
 		public void StartChase()
 		{
@@ -27,6 +23,7 @@ namespace MoNo.Christmas
 			disposableChase =  this.UpdateAsObservable()
 				.Subscribe(_ =>
 				{
+					if(target != null)
 					this.gameObject.transform.position = target.transform.position + diff;
 				});
 		}

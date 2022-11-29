@@ -2,18 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using Rando = UnityEngine.Random;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using MoNo.Utility;
 using TMPro;
 using UniRx;
-using UniRx.Triggers;
-using DG.Tweening;
-using Cysharp.Threading.Tasks;
-using UnityEngine.SceneManagement;
-using MoNo.Utility;
 using UniRx.Diagnostics;
+using UniRx.Triggers;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Rando = UnityEngine.Random;
 
-namespace MoNo.Christmas {
+namespace MoNo.Christmas
+{
 
 	public enum GameProgressState
 	{
@@ -46,7 +47,7 @@ namespace MoNo.Christmas {
 
 		[Header("System object")]
 		// field
-		GameProgressStateReactiveProperty _gameProgressState = new GameProgressStateReactiveProperty(GameProgressState.nothing);
+		GameProgressStateReactiveProperty _gameProgressState = new(GameProgressState.nothing);
 		Collider _triggerCollider;
 
 		//[Header("UI object")]
@@ -61,12 +62,10 @@ namespace MoNo.Christmas {
 		//[SerializeField] ResultCanvasBehavior resultCanvas;
 		//[SerializeField] GameOverCanvasBehavior gameOverCanvas;
 
-		[SerializeField] int _initItemsQuantity = 10;
-
 
 		// hide state
-		int _multiplyRate = 0; // 0 ~10
-		List<float> _multiplyRateCriterion = new List<float>() { 1, 1.2f, 1.4f, 1.6f, 1.8f, 2, 2.2f, 2.4f, 2.6f, 2.8f, 3 }; // 11 rank
+		readonly int _multiplyRate = 0; // 0 ~10
+		readonly List<float> _multiplyRateCriterion = new() { 1, 1.2f, 1.4f, 1.6f, 1.8f, 2, 2.2f, 2.4f, 2.6f, 2.8f, 3 }; // 11 rank
 
 		const string SAVE_STAGE_INDEX = "StageIndex";
 
@@ -125,7 +124,7 @@ namespace MoNo.Christmas {
 
 		}
 
-		void OnBeforeStart(){}
+		void OnBeforeStart() { }
 
 
 		void OnGoing()
@@ -154,27 +153,27 @@ namespace MoNo.Christmas {
 					 if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
 					 {
 						 int num = obstacle.Event(_player.chain.SnowBalls.Count);
-								//var addPinText = Instantiate(addPinPref, goingCanvas.gameObject.transform);
+						 //var addPinText = Instantiate(addPinPref, goingCanvas.gameObject.transform);
 						 if (num > 0)
 						 {
 							 for (int i = 0; i < num; i++)
 							 {
 								 _player.SpawnSnowBall();
 							 }
-									//addPinText.text = $"+" + num.ToString();
-								}
+							 //addPinText.text = $"+" + num.ToString();
+						 }
 						 else
 						 {
 							 for (int i = 0; i < -num; i++)
 							 {
 								 _player.DeleteSnowBall();
 							 }
-									//addPinText.text = num.ToString();
+							 //addPinText.text = num.ToString();
 						 }
 
 					 }
 
-					 if(triggerObj.TryGetComponent<PanelController>(out var panel))
+					 if (triggerObj.TryGetComponent<PanelController>(out var panel))
 					 {
 						 panel.DisAppear();
 					 }
@@ -194,9 +193,9 @@ namespace MoNo.Christmas {
 					_player.chain.mode.Value = ChainSnowBall.ProcessMode.Delta;
 				});
 
-			
 
-		  
+
+
 
 			// goal flag stands
 			_triggerCollider.OnTriggerEnterAsObservable()
@@ -204,7 +203,7 @@ namespace MoNo.Christmas {
 				.Subscribe(triggerObj =>
 				{
 					_gameProgressState.Value = GameProgressState.AfterGoal;
-					
+
 				}).AddTo(_triggerCollider).AddTo(this);
 		}
 

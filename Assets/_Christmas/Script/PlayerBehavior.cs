@@ -1,13 +1,13 @@
-using UnityEngine;
-using Lean.Touch;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using DG.Tweening;
+using Lean.Touch;
+using MoNo.Utility;
 using UniRx;
 using UniRx.Triggers;
-using DG.Tweening;
-using System.Collections.Generic;
-using MoNo.Utility;
+using UnityEngine;
 using UnityEngine.PlayerLoop;
-using System.Linq;
 
 namespace MoNo.Christmas
 {
@@ -34,7 +34,7 @@ namespace MoNo.Christmas
 		{
 			lean.OnDelta.AddListener(MoveHorizontal);
 
-			chain = new ChainSnowBall(ChainSnowBall.ProcessMode.Transform,snowBalls);
+			chain = new ChainSnowBall(ChainSnowBall.ProcessMode.Transform, snowBalls);
 			chain.SnowBalls
 				.ObserveCountChanged()
 				.Subscribe(count =>
@@ -45,11 +45,25 @@ namespace MoNo.Christmas
 
 			SetCamera();
 			SetTriggerCollider();
+
+			chain.mode
+				.Where(mode => mode == ChainSnowBall.ProcessMode.Transform)
+				.Subscribe(_ =>
+				{
+					_moveSpeed /= 1.5f;
+				}).AddTo(this);
+
+			chain.mode
+			.Where(mode => mode == ChainSnowBall.ProcessMode.Delta)
+			.Subscribe(_ =>
+			{
+				_moveSpeed *= 1.5f;
+			}).AddTo(this);
 		}
 
 		public void SpawnSnowBall()
 		{
-			var spawnPos = chain.SnowBalls[chain.SnowBalls.Count - 1].transform.position;
+			var spawnPos = chain.SnowBalls[^1].transform.position;
 			var spawnedSnowball = Instantiate(snowBallPref, spawnPos, Quaternion.identity, this.transform.parent);
 			chain.Append(spawnedSnowball);
 		}
@@ -73,8 +87,8 @@ namespace MoNo.Christmas
 			var latestIndex = chain.SnowBalls.Count - 1;
 			if (latestIndex < 0) return;
 			var headSnowBall = chain.SnowBalls[latestIndex].gameObject;
-			cam?.SetTarget(headSnowBall);
-			cam?.StartChase();
+			cam.SetTarget(headSnowBall);
+			cam.StartChase();
 		}
 
 
@@ -82,7 +96,8 @@ namespace MoNo.Christmas
 		{
 			disposableMove?.Dispose();
 			disposableMove = this.FixedUpdateAsObservable()
-								.Subscribe(_ => {
+								.Subscribe(_ =>
+								{
 									FixedUpdatePosition();
 
 									chain.FixedUpdate();
@@ -116,7 +131,7 @@ namespace MoNo.Christmas
 
 		void MoveHorizontal(Vector2 magnitude)
 		{
-			var horizontalDelta = Vector3.right * magnitude.x * _horizontalMoveSpeed;
+			var horizontalDelta = _horizontalMoveSpeed * magnitude.x * Vector3.right;
 			_remainingDelta += horizontalDelta;
 
 
@@ -144,7 +159,8 @@ namespace MoNo.Christmas
 
 	public sealed class ChainSnowBall
 	{
-		public enum ProcessMode {
+		public enum ProcessMode
+		{
 			Transform,
 			Delta,
 		}
@@ -154,20 +170,20 @@ namespace MoNo.Christmas
 			public ProcessModeReactiveProperty(ProcessMode initialValue) : base(initialValue) { }
 
 		}
-		public ProcessModeReactiveProperty mode = new ProcessModeReactiveProperty();
+		public ProcessModeReactiveProperty mode = new();
 
 		public IReadOnlyReactiveCollection<SnowBallBehavior> SnowBalls => snowBalls;
-		ReactiveCollection<SnowBallBehavior> snowBalls = new ReactiveCollection<SnowBallBehavior>();
-		readonly List<Vector3> deltaPosList = new List<Vector3>() {Vector3.zero }; //  enter initialized value
-		readonly List<Vector3> firstObjPosList = new List<Vector3>() { Vector3.zero };
 
-		int frameDiff = 5;
+		readonly ReactiveCollection<SnowBallBehavior> snowBalls = new();
+		readonly List<Vector3> deltaPosList = new() { Vector3.zero }; //  enter initialized value
+		readonly List<Vector3> firstObjPosList = new() { Vector3.zero };
+		readonly int frameDiff = 10;
 
-		public ChainSnowBall(ProcessMode mode ,IEnumerable<SnowBallBehavior> snowBalls)
+		public ChainSnowBall(ProcessMode mode, IEnumerable<SnowBallBehavior> snowBalls)
 		{
-			foreach(var snowBall in snowBalls)
+			foreach (var snowBall in snowBalls)
 			{
-				Append(snowBall);	
+				Append(snowBall);
 			}
 
 			SubscribeMode();
@@ -194,7 +210,7 @@ namespace MoNo.Christmas
 				int index = deltaPosList.Count - 1;
 				Vector3 deltaPos = deltaPosList[index];
 
-				SnowBallBehavior latestSnowball = snowBalls[snowBalls.Count - 1];
+				SnowBallBehavior latestSnowball = snowBalls[^1];
 				latestSnowball.FixedUpdatePosition(deltaPos);
 				firstObjPosList.Add(latestSnowball.transform.position - new Vector3(0, latestSnowball.Radius.Value, 0));
 				frame += frameDiff;
@@ -234,7 +250,7 @@ namespace MoNo.Christmas
 						Vector3 deltaPos;
 						if (deltaPosList.Count - frame >= 0)
 						{
-							deltaPos = deltaPosList[deltaPosList.Count - frame];
+							deltaPos = deltaPosList[^frame];
 						}
 						else if (deltaPosList.Any())
 						{
@@ -251,7 +267,7 @@ namespace MoNo.Christmas
 					}
 					break;
 			}
-			
+
 		}
 
 		public void Append(SnowBallBehavior currentSnowBall)
@@ -268,7 +284,7 @@ namespace MoNo.Christmas
 
 		public GameObject LatestSnowBall()
 		{
-			return snowBalls[snowBalls.Count - 1].gameObject;
+			return snowBalls[^1].gameObject;
 		}
 
 		public void AddToPositionList(Vector3 vector3)
