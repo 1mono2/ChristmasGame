@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 2675009058726718349}
   m_Layer: 0
   m_Name: O3 Part 1
-  m_TagString: Untagged
+  m_TagString: Magma
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -227,7 +227,7 @@ MeshCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5111826487028637568}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
   m_Convex: 1
@@ -245,6 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 426c90bf1ff844a71aa736bf5e69cdb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  num: -1
 --- !u!95 &2675009058726718349
 Animator:
   serializedVersion: 4

@@ -14,10 +14,9 @@ GameObject:
   - component: {fileID: 2234577591495605833}
   - component: {fileID: 2234577591495605834}
   - component: {fileID: 2234577591495605835}
-  - component: {fileID: 2878853424469018155}
   m_Layer: 0
   m_Name: ObstacleBall
-  m_TagString: Untagged
+  m_TagString: Snow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -95,7 +94,7 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2234577591495605684}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
@@ -112,6 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 426c90bf1ff844a71aa736bf5e69cdb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  num: -1
 --- !u!114 &2234577591495605835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,19 +126,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movePower: 2
   rotatePower: 400
---- !u!114 &2878853424469018155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2234577591495605684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9a01ad4e7f624442910295b4ec69949, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isChase: 1
-  _trailsPref: {fileID: 8619754432333846589, guid: fac60a34d53ef4945ac4f30736d8f14b,
-    type: 3}
-  _target: {fileID: 2234577591495605684}

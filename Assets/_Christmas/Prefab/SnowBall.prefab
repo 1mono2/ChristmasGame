@@ -47,9 +47,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d7bc6657c6894779875adfafa0ebc73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: 97991124681040454}
-  collider: {fileID: 97991124681040455}
   meltingSnowPref: {fileID: 8135631377352097108, guid: ac8f6ba105a6e41ccb3ee2c47deb9e6b,
+    type: 3}
+  breakSnowPref: {fileID: 8135631377352097108, guid: 3cd6967d7c1344e9bb39b5b93acbaa4c,
     type: 3}
   _endPoint: {x: -4, y: 4}
   sphereRotateSpeed: 10

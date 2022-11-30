@@ -1,21 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
+using MoNo.Christmas;
 using UnityEngine;
 
-public class ClearStagePanel : MonoBehaviour, IObstacle
+
+namespace MoNo.Christmas
 {
-	int num = 0;
-	public int Num => num;
-
-	public int Event(int currentNum)
+	public class ClearStagePanel : MonoBehaviour, IObstacle
 	{
-		throw new System.NotImplementedException();
+		int num = 0;
+		public int Num => num;
+
+		public int Event(PlayerBehavior player)
+		{
+			player.Stop();
+			var material = GetComponent<Renderer>().material;
+			material.DOColor(Color.white, 0.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+			return 0;
+
+		}
+
+		private void OnDestroy()
+		{
+			this.transform.DOKill();
+		}
+
 	}
-
-	public int Event(int currentNum, SnowBallBehavior snowBall)
-	{
-
-		return 0;
-	}
-
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MoNo.Christmas
 {
-	public class OrganizeQuantity : MonoBehaviour, IObstacle
+	public class OrganizeQuantity : MonoBehaviour
 	{
 		public enum ArithmeticOperations
 		{

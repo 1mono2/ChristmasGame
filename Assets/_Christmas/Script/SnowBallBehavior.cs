@@ -10,6 +10,7 @@ using UnityEngine;
 public class SnowBallBehavior : MonoBehaviour
 {
 	[SerializeField] ParticleSystem meltingSnowPref;
+	[SerializeField] ParticleSystem breakSnowPref;
 
 	public IReadOnlyReactiveProperty<float> Radius => radius;
 
@@ -34,6 +35,14 @@ public class SnowBallBehavior : MonoBehaviour
 			.Subscribe(_radius =>
 			{
 				Destroy(this.gameObject);
+			}).AddTo(this);
+
+		// Obstacle
+		this.OnCollisionEnterAsObservable()
+			.Where(collision => collision.collider.CompareTag("Magma"))
+			.Subscribe(_ =>
+			{
+				Break(-20);
 			}).AddTo(this);
 
 		// Snow & Magma
@@ -123,6 +132,15 @@ public class SnowBallBehavior : MonoBehaviour
 		radius.Value = this.transform.localScale.x / 2;
 		var meltingSnow = Instantiate(meltingSnowPref, this.transform.position, Quaternion.identity);
 		meltingSnow.Play();
+	}
+
+	public void Break(float unit)
+	{
+		float multiplyTime = unit * Time.fixedDeltaTime;
+		this.transform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
+		radius.Value = this.transform.localScale.x / 2;
+		var breakSnow = Instantiate(breakSnowPref, this.transform.position, Quaternion.identity);
+		breakSnow.Play();
 	}
 
 

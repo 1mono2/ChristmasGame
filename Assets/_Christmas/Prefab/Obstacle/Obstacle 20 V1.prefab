@@ -68,7 +68,7 @@ GameObject:
   - component: {fileID: 2120097919148483303}
   m_Layer: 0
   m_Name: O20 Part 1
-  m_TagString: Untagged
+  m_TagString: Magma
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -150,6 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 426c90bf1ff844a71aa736bf5e69cdb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  num: 1
 --- !u!136 &2120097919148483303
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -158,7 +159,7 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8250072336673081162}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.27
   m_Height: 1.25

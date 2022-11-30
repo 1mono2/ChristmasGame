@@ -34,7 +34,7 @@ namespace MoNo.Christmas
 		{
 			lean.OnDelta.AddListener(MoveHorizontal);
 
-			chain = new ChainSnowBall(ChainSnowBall.ProcessMode.Transform, snowBalls);
+			chain = new ChainSnowBall(ChainSnowBall.ProcessMode.Delta, snowBalls);
 			chain.SnowBalls
 				.ObserveCountChanged()
 				.Subscribe(count =>
@@ -46,19 +46,19 @@ namespace MoNo.Christmas
 			SetCamera();
 			SetTriggerCollider();
 
-			chain.mode
-				.Where(mode => mode == ChainSnowBall.ProcessMode.Transform)
-				.Subscribe(_ =>
-				{
-					_moveSpeed /= 1.5f;
-				}).AddTo(this);
+			// chain.mode
+			// 	.Where(mode => mode == ChainSnowBall.ProcessMode.Transform)
+			// 	.Subscribe(_ =>
+			// 	{
+			// 		_moveSpeed /= 1.5f;
+			// 	}).AddTo(this);
 
-			chain.mode
-			.Where(mode => mode == ChainSnowBall.ProcessMode.Delta)
-			.Subscribe(_ =>
-			{
-				_moveSpeed *= 1.5f;
-			}).AddTo(this);
+			// chain.mode
+			// .Where(mode => mode == ChainSnowBall.ProcessMode.Delta)
+			// .Subscribe(_ =>
+			// {
+			// 	_moveSpeed *= 1.5f;
+			// }).AddTo(this);
 		}
 
 		public void SpawnSnowBall()
@@ -108,6 +108,11 @@ namespace MoNo.Christmas
 		public void Stop()
 		{
 			disposableMove?.Dispose();
+		}
+
+		public void ResetDelta()
+		{
+			_remainingDelta = Vector3.zero;
 		}
 
 
@@ -205,7 +210,7 @@ namespace MoNo.Christmas
 			int frame = 1;
 
 			// controlling first snowball via delta mode restrictly.
-			if (deltaPosList.Count - frame >= 0)
+			if (deltaPosList.Count - frame >= 0 && snowBalls.Count > 0)
 			{
 				int index = deltaPosList.Count - 1;
 				Vector3 deltaPos = deltaPosList[index];

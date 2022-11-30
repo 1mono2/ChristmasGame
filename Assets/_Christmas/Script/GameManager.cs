@@ -150,32 +150,42 @@ namespace MoNo.Christmas
 			_triggerCollider.OnTriggerEnterAsObservable()
 				 .Subscribe(triggerObj =>
 				 {
+					 //  if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
+					 //  {
+					 // 	 int num = obstacle.Event(_player.chain.SnowBalls.Count);
+					 // 	 //var addPinText = Instantiate(addPinPref, goingCanvas.gameObject.transform);
+					 // 	 if (num > 0)
+					 // 	 {
+					 // 		 for (int i = 0; i < num; i++)
+					 // 		 {
+					 // 			 _player.SpawnSnowBall();
+					 // 		 }
+					 // 		 //addPinText.text = $"+" + num.ToString();
+					 // 	 }
+					 // 	 else
+					 // 	 {
+					 // 		 for (int i = 0; i < -num; i++)
+					 // 		 {
+					 // 			 _player.DeleteSnowBall();
+					 // 		 }
+					 // 		 //addPinText.text = num.ToString();
+					 // 	 }
+
+					 //  }
+
+					 //  if (triggerObj.TryGetComponent<PanelController>(out var panel))
+					 //  {
+					 // 	 panel.DisAppear();
+					 //  }
+				 }).AddTo(_triggerCollider).AddTo(this);
+
+
+			_triggerCollider.OnTriggerEnterAsObservable()
+				 .Subscribe(triggerObj =>
+				 {
 					 if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
 					 {
-						 int num = obstacle.Event(_player.chain.SnowBalls.Count);
-						 //var addPinText = Instantiate(addPinPref, goingCanvas.gameObject.transform);
-						 if (num > 0)
-						 {
-							 for (int i = 0; i < num; i++)
-							 {
-								 _player.SpawnSnowBall();
-							 }
-							 //addPinText.text = $"+" + num.ToString();
-						 }
-						 else
-						 {
-							 for (int i = 0; i < -num; i++)
-							 {
-								 _player.DeleteSnowBall();
-							 }
-							 //addPinText.text = num.ToString();
-						 }
-
-					 }
-
-					 if (triggerObj.TryGetComponent<PanelController>(out var panel))
-					 {
-						 panel.DisAppear();
+						 obstacle.Event(_player);
 					 }
 				 }).AddTo(_triggerCollider).AddTo(this);
 
