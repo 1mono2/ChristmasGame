@@ -12,9 +12,10 @@ GameObject:
   - component: {fileID: 8228066725940145398}
   - component: {fileID: 8228066725940145399}
   - component: {fileID: 8228066725940145392}
+  - component: {fileID: 5926286033675598017}
   m_Layer: 0
   m_Name: Snow
-  m_TagString: Snow
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -97,3 +98,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5926286033675598017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8228066725940145393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 223112b7b42e7497082bd5adbd2778e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

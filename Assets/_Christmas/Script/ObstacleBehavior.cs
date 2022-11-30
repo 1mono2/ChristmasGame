@@ -7,14 +7,20 @@ namespace MoNo.Christmas
 {
 	public class ObstacleBehavior : MonoBehaviour, IObstacle
 	{
-		[SerializeField] int num = -1;
-		public int Num => num;
-
-
-		public int Event(PlayerBehavior player)
+		public void OnEnterEvent(SnowBallBehavior1 snowball)
 		{
-			return num;
+			snowball.ResetSpeed();
+			snowball.Break();
 		}
 
+		public void OnExitEvent(SnowBallBehavior1 snowball)
+		{
+
+		}
+
+		public void OnStayEvent(SnowBallBehavior1 snowball)
+		{
+
+		}
 	}
 }

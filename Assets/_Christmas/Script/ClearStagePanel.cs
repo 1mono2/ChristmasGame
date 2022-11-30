@@ -9,15 +9,22 @@ namespace MoNo.Christmas
 {
 	public class ClearStagePanel : MonoBehaviour, IObstacle
 	{
-		int num = 0;
-		public int Num => num;
 
-		public int Event(PlayerBehavior player)
+		public void OnEnterEvent(SnowBallBehavior1 snowball)
 		{
-			player.Stop();
+			snowball.Stop();
 			var material = GetComponent<Renderer>().material;
 			material.DOColor(Color.white, 0.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
-			return 0;
+			GameManager1.I.gameProgressState1.Value = GameManager1.GameProgressState1.Result;
+		}
+
+		public void OnExitEvent(SnowBallBehavior1 snowball)
+		{
+
+		}
+
+		public void OnStayEvent(SnowBallBehavior1 snowball)
+		{
 
 		}
 

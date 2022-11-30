@@ -12,9 +12,10 @@ GameObject:
   - component: {fileID: 6500607860547068253}
   - component: {fileID: 6500607860547068254}
   - component: {fileID: 6500607860547068255}
+  - component: {fileID: 6156606252436139677}
   m_Layer: 0
   m_Name: Lava
-  m_TagString: Magma
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -97,3 +98,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6156606252436139677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6500607860547068240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73bb5ee244ebd43a680dc039622b3d3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

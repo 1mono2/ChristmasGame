@@ -26,10 +26,10 @@ namespace MoNo.Christmas
 		nothing,
 	}
 	[System.Serializable]
-	public class GameProgressStateReactiveProperty : ReactiveProperty<GameProgressState>
+	public class GameProgressStateReactiveProperty1 : ReactiveProperty<GameProgressState>
 	{
-		public GameProgressStateReactiveProperty() { }
-		public GameProgressStateReactiveProperty(GameProgressState initialValue) : base(initialValue) { }
+		public GameProgressStateReactiveProperty1() { }
+		public GameProgressStateReactiveProperty1(GameProgressState initialValue) : base(initialValue) { }
 	}
 
 	public class GameManager : SingletonMonoBehaviour<GameManager>
@@ -37,7 +37,7 @@ namespace MoNo.Christmas
 		protected override bool DontDestroy => false;
 
 		// property
-		public GameProgressStateReactiveProperty gameProgressState { get { return _gameProgressState; } set { _gameProgressState = value; } }
+		public GameProgressStateReactiveProperty1 gameProgressState { get { return _gameProgressState; } set { _gameProgressState = value; } }
 
 
 		[Header("Realistic object")]
@@ -47,7 +47,7 @@ namespace MoNo.Christmas
 
 		[Header("System object")]
 		// field
-		GameProgressStateReactiveProperty _gameProgressState = new(GameProgressState.nothing);
+		GameProgressStateReactiveProperty1 _gameProgressState = new(GameProgressState.nothing);
 		Collider _triggerCollider;
 
 		//[Header("UI object")]
@@ -185,7 +185,7 @@ namespace MoNo.Christmas
 				 {
 					 if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
 					 {
-						 obstacle.Event(_player);
+						 //obstacle.Event(_player);
 					 }
 				 }).AddTo(_triggerCollider).AddTo(this);
 

@@ -1,9 +1,11 @@
 
-using MoNo.Christmas;
-
-public interface IObstacle
+namespace MoNo.Christmas
 {
-	//  interface's valunable enfore coder to write accessor.
-	public int Num { get; }
-	public int Event(PlayerBehavior player);
+	public interface IObstacle
+	{
+		//  interface's valunable enfore coder to write accessor.
+		public void OnEnterEvent(SnowBallBehavior1 snowball);
+		public void OnStayEvent(SnowBallBehavior1 snowball);
+		public void OnExitEvent(SnowBallBehavior1 snowball);
+	}
 }
