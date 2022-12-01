@@ -22,7 +22,7 @@ public class SnowBallBehavior : MonoBehaviour
 	[SerializeField] Vector2 _endPoint = new(-4, 4);
 	[SerializeField] float sphereRotateSpeed = 1f;
 
-	const float radiusCriterion = 0.25f;
+	const float radiusCriterion = 0.5f;
 	const float ballSizeIncreaseUnit = 1.0f;
 	const float ballSizeDecreaseUnit = -1.5f;
 
