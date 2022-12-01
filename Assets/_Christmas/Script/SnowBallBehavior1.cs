@@ -12,8 +12,8 @@ namespace MoNo.Christmas
 {
 	public class SnowBallBehavior1 : MonoBehaviour
 	{
-		public SphereCollider Collider => collider;
-		[SerializeField] SphereCollider collider;
+		public SphereCollider Collider => sphereCollider;
+		[SerializeField] SphereCollider sphereCollider;
 		[SerializeField] LeanMultiUpdate lean;
 		[Header("Move property")]
 		[SerializeField] float _damping = 10f;
@@ -134,7 +134,7 @@ namespace MoNo.Christmas
 		void RotateBall()
 		{
 
-			this.transform.RotateAroundLocal(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
+			this.transform.Rotate(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
 			// var axis = Vector3.Cross(deltaDelta.normalized, Vector3.down); //  find axis from direcition using Cross()
 			// this.transform.RotateAroundLocal(dir, sphereRotateSpeed * Time.fixedDeltaTime);
 		}
