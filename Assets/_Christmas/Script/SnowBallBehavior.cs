@@ -10,7 +10,7 @@ using UnityEngine.Events;
 
 namespace MoNo.Christmas
 {
-	public class SnowBallBehavior1 : MonoBehaviour
+	public class SnowBallBehavior : MonoBehaviour
 	{
 		public SphereCollider Collider => sphereCollider;
 		[SerializeField] SphereCollider sphereCollider;
@@ -97,7 +97,7 @@ namespace MoNo.Christmas
 			}
 			finalTransform.position += deltaDelta;
 
-			RotateBall();
+			RotateBall(deltaDelta);
 		}
 
 		void MoveForward()
@@ -131,12 +131,13 @@ namespace MoNo.Christmas
 			return 1.0f - Mathf.Pow((float)System.Math.E, -speed * elapsed);
 		}
 
-		void RotateBall()
+		[Obsolete]
+		void RotateBall(Vector3 delta)
 		{
 
-			this.transform.Rotate(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
-			// var axis = Vector3.Cross(deltaDelta.normalized, Vector3.down); //  find axis from direcition using Cross()
-			// this.transform.RotateAroundLocal(dir, sphereRotateSpeed * Time.fixedDeltaTime);
+			//this.transform.Rotate(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
+			var axis = Vector3.Cross(delta, Vector3.down); //  find axis from direcition using Cross()
+			this.transform.RotateAroundLocal(axis, sphereRotateSpeed * Time.fixedDeltaTime);
 		}
 
 		public void UpSize()

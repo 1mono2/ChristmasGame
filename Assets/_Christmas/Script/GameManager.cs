@@ -15,23 +15,23 @@ using Rando = UnityEngine.Random;
 
 namespace MoNo.Christmas
 {
-	public class GameManager1 : SingletonMonoBehaviour<GameManager1>
+	public class GameManager : SingletonMonoBehaviour<GameManager>
 	{
 		protected override bool DontDestroy => false;
 
 		// property
-		public GameProgressStateReactiveProperty1 gameProgressState1 { get { return _gameProgressState1; } set { _gameProgressState1 = value; } }
+		public GameProgressStateReactiveProperty gameProgressState1 { get { return _gameProgressState; } set { _gameProgressState = value; } }
 
 
 		[Header("Realistic object")]
-		[SerializeField] SnowBallBehavior1 _snowBall;
+		[SerializeField] SnowBallBehavior _snowBall;
 		[SerializeField] GameObject[] _stages;
 		[SerializeField] ParticleSystem _confettiPref;
 		[SerializeField] ChaseTarget _mainCamera;
 
 		[Header("System object")]
 		// field
-		GameProgressStateReactiveProperty1 _gameProgressState1 = new(GameProgressState1.nothing);
+		GameProgressStateReactiveProperty _gameProgressState = new(GameProgressState.nothing);
 		SphereCollider _snowBallCollider;
 
 		[Header("UI object")]
@@ -59,18 +59,18 @@ namespace MoNo.Christmas
 		{
 			DOTween.SetTweensCapacity(1500, 50);
 			_snowBallCollider = _snowBall.Collider;
-			_gameProgressState1.Value = GameProgressState1.BeforeStart;
+			_gameProgressState.Value = GameProgressState.BeforeStart;
 
-			_gameProgressState1
-				.Where(state => state == GameProgressState1.BeforeStart)
+			_gameProgressState
+				.Where(state => state == GameProgressState.BeforeStart)
 				.Subscribe(state =>
 				{
 					OnBeforeStart();
 					Debug.Log("before start");
 				});
 
-			_gameProgressState1
-				.Where(state => state == GameProgressState1.Going)
+			_gameProgressState
+				.Where(state => state == GameProgressState.Going)
 				.Subscribe(state =>
 				{
 					OnGoing();
@@ -78,8 +78,8 @@ namespace MoNo.Christmas
 				});
 
 
-			_gameProgressState1
-			  .Where(state => state == GameProgressState1.AfterGoal)
+			_gameProgressState
+			  .Where(state => state == GameProgressState.AfterGoal)
 			  .Subscribe(state =>
 			  {
 				  OnAfterGoal();
@@ -87,16 +87,16 @@ namespace MoNo.Christmas
 			  });
 
 
-			_gameProgressState1
-				.Where(state => state == GameProgressState1.Result)
+			_gameProgressState
+				.Where(state => state == GameProgressState.Result)
 				.Subscribe(state =>
 				{
 					OnResult();
 					Debug.Log("result");
 				});
 
-			_gameProgressState1
-				.Where(state => state == GameProgressState1.GameOver)
+			_gameProgressState
+				.Where(state => state == GameProgressState.GameOver)
 				.Subscribe(state =>
 				{
 					OnGameOver();
@@ -112,7 +112,7 @@ namespace MoNo.Christmas
 			_startCanvas.tapToStart.OnFinger.AddListener(leanFinger =>
 			{
 				_startCanvas.gameObject.SetActive(false);
-				_gameProgressState1.Value = GameProgressState1.Going;
+				_gameProgressState.Value = GameProgressState.Going;
 			});
 
 			_startCanvas.levelText.text = $"Level {SceneManager.GetActiveScene().buildIndex}";
@@ -127,11 +127,13 @@ namespace MoNo.Christmas
 
 			_snowBall.OnDestroyEvent.AddListener(() =>
 			{
-				_gameProgressState1.Value = GameProgressState1.GameOver;
+				_gameProgressState.Value = GameProgressState.GameOver;
 			});
 
 			// Collision Event
 			_snowBallCollider.OnCollisionEnterAsObservable()
+			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
 				.Subscribe(col =>
 				{
 					if (col.collider.TryGetComponent(out IObstacle obstacle))
@@ -141,6 +143,8 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnCollisionStayAsObservable()
+			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+			.ThrottleFirstFrame(1)
 				.Subscribe(col =>
 				{
 					if (col.collider.TryGetComponent(out IObstacle obstacle))
@@ -150,6 +154,8 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnCollisionExitAsObservable()
+				.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
 				.Subscribe(col =>
 				{
 					if (col.collider.TryGetComponent(out IObstacle obstacle))
@@ -160,6 +166,8 @@ namespace MoNo.Christmas
 
 			// Trigger Event
 			_snowBallCollider.OnTriggerEnterAsObservable()
+				.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
 				.Subscribe(collider =>
 				{
 					if (collider.TryGetComponent(out IObstacle obstacle))
@@ -169,6 +177,8 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnTriggerStayAsObservable()
+			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
 				.Subscribe(collider =>
 				{
 					if (collider.TryGetComponent(out IObstacle obstacle))
@@ -178,6 +188,8 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnTriggerExitAsObservable()
+			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
 				.Subscribe(collider =>
 				{
 					if (collider.TryGetComponent(out IObstacle obstacle))
@@ -266,7 +278,7 @@ namespace MoNo.Christmas
 		}
 
 
-		public enum GameProgressState1
+		public enum GameProgressState
 		{
 			BeforeStart,
 			Going,
@@ -276,10 +288,10 @@ namespace MoNo.Christmas
 			nothing,
 		}
 		[System.Serializable]
-		public class GameProgressStateReactiveProperty1 : ReactiveProperty<GameProgressState1>
+		public class GameProgressStateReactiveProperty : ReactiveProperty<GameProgressState>
 		{
-			public GameProgressStateReactiveProperty1() { }
-			public GameProgressStateReactiveProperty1(GameProgressState1 initialValue) : base(initialValue) { }
+			public GameProgressStateReactiveProperty() { }
+			public GameProgressStateReactiveProperty(GameProgressState initialValue) : base(initialValue) { }
 		}
 	}
 
