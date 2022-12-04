@@ -28,6 +28,11 @@ Export/
 # Visual Studio cache directory
 .vs/
 
+# editor config file
+.editorconfig
+.vscode/
+.vsconfig
+
 # Gradle cache directory
 .gradle/
 
