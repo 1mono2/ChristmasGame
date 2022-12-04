@@ -7,16 +7,10 @@ using UnityEngine.UI;
 
 namespace MoNo.Christmas
 {
-    public class ResultCanvasBehavior : MonoBehaviour
-    {
-        [SerializeField] Canvas resultCanvas;
-        [SerializeField] Button nextLevelButton;
-
-        public UnityAction nextLevelButtonAction;
-
-        void Start()
-        {
-            nextLevelButton.onClick.AddListener(nextLevelButtonAction);
-        }
-    }
+	public class ResultCanvasBehavior : MonoBehaviour
+	{
+		public Canvas resultCanvas;
+		public Button nextLevelButton;
+        
+	}
 }

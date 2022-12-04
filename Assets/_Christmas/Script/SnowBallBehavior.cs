@@ -35,8 +35,8 @@ namespace MoNo.Christmas
 		[SerializeField] ParticleSystem meltingSnowPref;
 		[SerializeField] ParticleSystem breakSnowPref;
 
-		[HideInInspector] public UnityEvent OnDestroyEvent => onDestroyEvent;
-		readonly UnityEvent onDestroyEvent = new();
+		[HideInInspector] public UnityEvent OnDisapearEvent => onDisapearEvent;
+		readonly UnityEvent onDisapearEvent = new();
 
 
 
@@ -51,7 +51,7 @@ namespace MoNo.Christmas
 				{
 					var breakSnow = Instantiate(breakSnowPref, this.transform.position, Quaternion.identity);
 					breakSnow.Play();
-					Destroy(this.gameObject);
+					OnDisapear();
 				}).AddTo(this);
 
 		}
@@ -168,13 +168,15 @@ namespace MoNo.Christmas
 			radius.Value = this.transform.localScale.x / 2;
 		}
 
-
+		public void OnDisapear()
+		{
+			onDisapearEvent.Invoke();
+			onDisapearEvent.RemoveAllListeners();
+		}
 
 		private void OnDestroy()
 		{
 			this.transform.DOKill();
-			onDestroyEvent.Invoke();
-			onDestroyEvent.RemoveAllListeners();
 			Debug.Log("Destroy: " + gameObject.name);
 		}
 

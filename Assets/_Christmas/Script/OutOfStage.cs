@@ -7,16 +7,16 @@ public class OutOfStage : MonoBehaviour, IObstacle
 {
 	public void OnEnterEvent(SnowBallBehavior snowball)
 	{
-		Destroy(snowball.gameObject);
+		snowball.OnDisapear();
 	}
 
 	public void OnExitEvent(SnowBallBehavior snowball)
 	{
-		Destroy(snowball.gameObject);
+		snowball.OnDisapear();
 	}
 
 	public void OnStayEvent(SnowBallBehavior snowball)
 	{
-		Destroy(snowball.gameObject);
+		snowball.OnDisapear();
 	}
 }

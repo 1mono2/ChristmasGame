@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using GoogleMobileAds.Api;
+using GoogleMobileAds.Placement;
 using MoNo.Utility;
 using TMPro;
 using UniRx;
@@ -36,15 +38,9 @@ namespace MoNo.Christmas
 
 		[Header("UI object")]
 		[SerializeField] StartCanvasBehavior _startCanvas;
-		//[SerializeField] RectTransform pinsCount;
-		//[SerializeField] TextMeshProUGUI pinsCountText;
-		//[SerializeField] TextMeshProUGUI addPinPref;
-		//[SerializeField] TextMeshProUGUI multiplyRateText;
-		//[SerializeField] StartCanvasBehavior startCanvas;
-		//[SerializeField] Canvas goingCanvas;
-		//[SerializeField] BowlingCanvasBehavior bowlingCanvas;
-		//[SerializeField] ResultCanvasBehavior resultCanvas;
-		//[SerializeField] GameOverCanvasBehavior gameOverCanvas;
+		[SerializeField] GoingCanvas _goingCanvas;
+		[SerializeField] ResultCanvasBehavior _resultCanvas;
+		[SerializeField] GameOverCanvasBehavior _gameOverCanvas;
 
 
 		// hide state
@@ -53,11 +49,18 @@ namespace MoNo.Christmas
 
 		const string SAVE_STAGE_INDEX = "StageIndex";
 
+		private void Awake()
+		{
+			if (LoadData.I == null)
+			{
+				SceneManager.LoadScene("PreLoad");
+				return;
+			}
 
+		}
 
 		void Start()
 		{
-			DOTween.SetTweensCapacity(1500, 50);
 			_snowBallCollider = _snowBall.Collider;
 			_gameProgressState.Value = GameProgressState.BeforeStart;
 
@@ -76,15 +79,6 @@ namespace MoNo.Christmas
 					OnGoing();
 					Debug.Log("going");
 				});
-
-
-			_gameProgressState
-			  .Where(state => state == GameProgressState.AfterGoal)
-			  .Subscribe(state =>
-			  {
-				  OnAfterGoal();
-				  Debug.Log("AfterGoal");
-			  });
 
 
 			_gameProgressState
@@ -123,9 +117,16 @@ namespace MoNo.Christmas
 
 		void OnGoing()
 		{
-			//goingCanvas.gameObject.SetActive(true);
+			_goingCanvas.gameObject.SetActive(true);
 
-			_snowBall.OnDestroyEvent.AddListener(() =>
+			_snowBall.Radius
+				.Select(x => x * 2)
+				.Subscribe(radius =>
+				{
+					_goingCanvas.countText.text = radius.ToString("F2");
+				});
+
+			_snowBall.OnDisapearEvent.AddListener(() =>
 			{
 				_gameProgressState.Value = GameProgressState.GameOver;
 			});
@@ -203,41 +204,27 @@ namespace MoNo.Christmas
 
 		}
 
-		void OnAfterGoal()
-		{
-
-			//goingCanvas.gameObject.SetActive(false);
-			//bowlingCanvas.gameObject.SetActive(true);
-			//multiplyRateText.text = $"x{multiplyRateCriterion[multiplyRate]}";
-
-			var camStopperPos = Vector3.zero;
-			Instantiate(_confettiPref, camStopperPos + new Vector3(-4, 0, 5), Quaternion.Euler(-45, 90, 0));
-			Instantiate(_confettiPref, camStopperPos + new Vector3(4, 0, 5), Quaternion.Euler(-45, -90, 0));
-
-			_stages[_multiplyRate].GetComponent<Renderer>().material.DOColor(Color.white, 1).SetLoops(-1, LoopType.Yoyo);
-
-		}
-
 		void OnGameOver()
 		{
+			_goingCanvas.gameObject.SetActive(false);
 			_snowBall.Stop();
-			//gameOverCanvas.retryButtonAction += () => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-			//gameOverCanvas.gameObject.SetActive(true);
+			_gameOverCanvas.retryButton.onClick.AddListener(() => SceneManager.LoadScene(SceneManager.GetActiveScene().name));
+			_gameOverCanvas.gameObject.SetActive(true);
 		}
 
 		void OnResult()
 		{
-			//bowlingCanvas.gameObject.SetActive(false);
+			_goingCanvas.gameObject.SetActive(false);
+			_resultCanvas.gameObject.SetActive(true);
 
-			//resultCanvas.gameObject.SetActive(true);
-			//if (LoadData.I.isShowAd == true)
-			//{
-			//    resultCanvas.nextLevelButtonAction += ShowAds;
-			//}
-			//else
-			//{
-			//    resultCanvas.nextLevelButtonAction += NextStage;
-			//}
+			if (LoadData.I.isShowAd == true)
+			{
+				_resultCanvas.nextLevelButton.onClick.AddListener(ShowAds);
+			}
+			else
+			{
+				_resultCanvas.nextLevelButton.onClick.AddListener(NextStage);
+			}
 			SaveStageIndex();
 		}
 
@@ -254,8 +241,13 @@ namespace MoNo.Christmas
 
 		void ShowAds()
 		{
-			//InterstitialAds.I.OnAdClosed.AddListener(NextStage);
-			//InterstitialAds.I.ShowIfLoaded();
+			var interstitialAd = MobileAds.Instance.GetAd<InterstitialAdGameObject>("InterstitialAd");
+			interstitialAd.LoadAd();
+			interstitialAd.InterstitialAd.OnAdClosed += (sender, args) =>
+			{
+				NextStage();
+			};
+			interstitialAd.ShowIfLoaded();
 		}
 
 		public void NextStage()
@@ -282,7 +274,6 @@ namespace MoNo.Christmas
 		{
 			BeforeStart,
 			Going,
-			AfterGoal,
 			Result,
 			GameOver,
 			nothing,
