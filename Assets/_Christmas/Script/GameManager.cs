@@ -199,6 +199,19 @@ namespace MoNo.Christmas
 					}
 				}).AddTo(this).AddTo(_snowBallCollider);
 
+			// Trigger Event
+			_snowBallCollider.OnTriggerEnterAsObservable()
+				.Subscribe(collider =>
+				{
+					if (collider.gameObject.TryGetComponent(out SnowCube snowCube))
+					{
+						snowCube.OnEnterEvent(_snowBall);
+					}
+
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+
+
 			// move
 			_snowBall.Move();
 

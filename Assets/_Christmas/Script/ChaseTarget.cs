@@ -1,30 +1,30 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using DG.Tweening;
 using UniRx;
 using UniRx.Triggers;
-using System;
-using DG.Tweening;
+using UnityEngine;
 
 namespace MoNo.Christmas
 {
 	public class ChaseTarget : MonoBehaviour
 	{
-		GameObject target;
+		[SerializeField] GameObject target;
 		Vector3 diff = Vector3.zero;
 		IDisposable disposableChase;
-		
+
 
 		public void StartChase()
 		{
 			if (!target) { Debug.LogAssertion("Set target"); return; }
 			disposableChase?.Dispose();
 
-			disposableChase =  this.UpdateAsObservable()
+			disposableChase = this.UpdateAsObservable()
 				.Subscribe(_ =>
 				{
-					if(target != null)
-					this.gameObject.transform.position = target.transform.position + diff;
+					if (target != null)
+						this.gameObject.transform.position = target.transform.position + diff;
 				});
 		}
 
@@ -34,10 +34,10 @@ namespace MoNo.Christmas
 		}
 
 
-		public void SetTarget(GameObject target) 
+		public void SetTarget(GameObject target)
 		{
 			this.target = target;
-			if(diff == Vector3.zero) diff = this.gameObject.transform.position - target.transform.position;
+			if (diff == Vector3.zero) diff = this.gameObject.transform.position - target.transform.position;
 		}
 
 	}
