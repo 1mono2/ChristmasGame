@@ -28,8 +28,8 @@ namespace MoNo.Christmas
 		readonly ReactiveProperty<float> radius = new(1f);
 		public IReadOnlyReactiveProperty<float> Radius => radius;
 		const float radiusCriterion = 0.25f;
-		const float ballSizeIncreaseUnit = 1.0f;
-		const float ballSizeDecreaseUnit = -1.5f;
+		const float ballSizeIncreaseUnit = 2.0f;
+		const float ballSizeDecreaseUnit = -2.5f;
 
 		[Header("Effect")]
 		[SerializeField] ParticleSystem meltingSnowPref;

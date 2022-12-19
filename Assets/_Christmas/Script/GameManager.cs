@@ -203,12 +203,30 @@ namespace MoNo.Christmas
 			_snowBallCollider.OnTriggerEnterAsObservable()
 				.Subscribe(collider =>
 				{
-					if (collider.gameObject.TryGetComponent(out SnowCube snowCube))
+					if (collider.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
 					{
-						snowCube.OnEnterEvent(_snowBall);
+						duplicatable.OnEnterEvent(_snowBall);
 					}
 
 				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnTriggerStayAsObservable()
+				.Subscribe(collider =>
+				{
+					if (collider.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+					{
+						duplicatable.OnStayEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnTriggerExitAsObservable()
+			.Subscribe(collider =>
+			{
+				if (collider.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+				{
+					duplicatable.OnExitEvent(_snowBall);
+				}
+			}).AddTo(this).AddTo(_snowBallCollider);
 
 
 

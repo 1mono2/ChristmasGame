@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MoNo.Christmas;
 using UnityEngine;
 
-public class SnowCube : MonoBehaviour
+public class SnowCube : MonoBehaviour, IDuplicatableObstacle
 {
 	public void OnEnterEvent(SnowBallBehavior snowball)
 	{
