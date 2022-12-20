@@ -14,40 +14,43 @@ namespace MoNo.Christmas
 	{
 		public SphereCollider Collider => sphereCollider;
 		[SerializeField] SphereCollider sphereCollider;
+		[SerializeField] private Rigidbody rigidbody;
 		[SerializeField] LeanMultiUpdate lean;
 		[Header("Move property")]
 		[SerializeField] float _damping = 10f;
 		[SerializeField] float _horizontalMoveSpeed = 0.2f;
 		[SerializeField] float _moveSpeed = 15f;
 		Vector3 _remainingDelta = Vector3.zero;
-		IDisposable disposableMove;
+		IDisposable _disposableMove;
 		[SerializeField] Vector2 _endPoint = new(-4, 4);
 		[SerializeField] float sphereRotateSpeed = 10f;
+		[SerializeField] float _jumpPower = 1.0f;
+		
 
 		[Header("Radius property")]
-		readonly ReactiveProperty<float> radius = new(1f);
-		public IReadOnlyReactiveProperty<float> Radius => radius;
-		const float radiusCriterion = 0.25f;
-		const float ballSizeIncreaseUnit = 2.0f;
-		const float ballSizeDecreaseUnit = -2.5f;
+		readonly ReactiveProperty<float> _radius = new(1f);
+		public IReadOnlyReactiveProperty<float> Radius => _radius;
+		const float RadiusCriterion = 0.25f;
+		const float BallSizeIncreaseUnit = 2.0f;
+		const float BallSizeDecreaseUnit = -2.5f;
 
 		[Header("Effect")]
 		[SerializeField] ParticleSystem meltingSnowPref;
 		[SerializeField] ParticleSystem breakSnowPref;
 
-		[HideInInspector] public UnityEvent OnDisapearEvent => onDisapearEvent;
-		readonly UnityEvent onDisapearEvent = new();
+		[HideInInspector] public UnityEvent OnDisapearEvent => _onDisapearEvent;
+		readonly UnityEvent _onDisapearEvent = new();
 
 
 
 		void Start()
 		{
 			lean.OnDelta.AddListener(MoveHorizontal);
-			radius.Value = this.transform.localScale.x / 2;
+			_radius.Value = this.transform.localScale.x / 2;
 			// if it make the snowball smaller than the criterion, the snowball is destroyed.
-			radius
-				.Where(_radius => _radius < radiusCriterion)
-				.Subscribe(_radius =>
+			_radius
+				.Where(radius => radius < RadiusCriterion)
+				.Subscribe(_ =>
 				{
 					var breakSnow = Instantiate(breakSnowPref, this.transform.position, Quaternion.identity);
 					breakSnow.Play();
@@ -58,8 +61,8 @@ namespace MoNo.Christmas
 
 		public void Move()
 		{
-			disposableMove?.Dispose();
-			disposableMove = this.FixedUpdateAsObservable()
+			_disposableMove?.Dispose();
+			_disposableMove = this.FixedUpdateAsObservable()
 								.Subscribe(_ =>
 								{
 									FixedUpdatePosition();
@@ -68,7 +71,7 @@ namespace MoNo.Christmas
 
 		public void Stop()
 		{
-			disposableMove?.Dispose();
+			_disposableMove?.Dispose();
 		}
 
 		public void ResetSpeed()
@@ -77,8 +80,7 @@ namespace MoNo.Christmas
 		}
 
 
-
-		public void FixedUpdatePosition()
+		private void FixedUpdatePosition()
 		{
 			MoveForward();
 			var fact = DampenFactor(_damping, Time.fixedDeltaTime);
@@ -130,27 +132,26 @@ namespace MoNo.Christmas
 
 			return 1.0f - Mathf.Pow((float)System.Math.E, -speed * elapsed);
 		}
-
-		[Obsolete]
+		
 		void RotateBall(Vector3 delta)
 		{
 
 			//this.transform.Rotate(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
 			var axis = Vector3.Cross(delta, Vector3.down); //  find axis from direcition using Cross()
-			this.transform.RotateAroundLocal(axis, sphereRotateSpeed * Time.fixedDeltaTime);
+			this.transform.Rotate(axis, sphereRotateSpeed * Time.fixedDeltaTime, Space.World);
 		}
 
 		public void UpSize()
 		{
-			ChangeSphereSize(ballSizeIncreaseUnit);
-			var meltingSnowPos = this.transform.position + radius.Value * Vector3.down;
+			ChangeSphereSize(BallSizeIncreaseUnit);
+			var meltingSnowPos = this.transform.position + _radius.Value * Vector3.down;
 			var meltingSnow = Instantiate(meltingSnowPref, meltingSnowPos, Quaternion.identity);
 			meltingSnow.Play();
 		}
 
 		public void DownSize()
 		{
-			ChangeSphereSize(ballSizeDecreaseUnit);
+			ChangeSphereSize(BallSizeDecreaseUnit);
 			var meltingSnow = Instantiate(meltingSnowPref, this.transform.position, Quaternion.identity);
 			meltingSnow.Play();
 		}
@@ -163,15 +164,21 @@ namespace MoNo.Christmas
 
 		void ChangeSphereSize(float unit)
 		{
+			Transform thisTransform = transform;
 			float multiplyTime = unit * Time.fixedDeltaTime;
-			this.transform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
-			radius.Value = this.transform.localScale.x / 2;
+			thisTransform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
+			_radius.Value = thisTransform.localScale.x / 2;
+		}
+
+		public void Jump()
+		{
+			rigidbody.AddForce(new Vector3(0, 1, -0.5f) * _jumpPower, ForceMode.Force);
 		}
 
 		public void OnDisapear()
 		{
-			onDisapearEvent.Invoke();
-			onDisapearEvent.RemoveAllListeners();
+			_onDisapearEvent.Invoke();
+			_onDisapearEvent.RemoveAllListeners();
 		}
 
 		private void OnDestroy()

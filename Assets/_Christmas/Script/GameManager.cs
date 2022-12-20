@@ -1,13 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Placement;
 using MoNo.Utility;
-using TMPro;
 using UniRx;
 using UniRx.Diagnostics;
 using UniRx.Triggers;
@@ -22,7 +16,9 @@ namespace MoNo.Christmas
 		protected override bool DontDestroy => false;
 
 		// property
-		public GameProgressStateReactiveProperty gameProgressState1 { get { return _gameProgressState; } set { _gameProgressState = value; } }
+		public GameProgressStateReactiveProperty gameProgressState1 { get => _gameProgressState;
+			set => _gameProgressState = value;
+		}
 
 
 		[Header("Realistic object")]
@@ -33,7 +29,7 @@ namespace MoNo.Christmas
 
 		[Header("System object")]
 		// field
-		GameProgressStateReactiveProperty _gameProgressState = new(GameProgressState.nothing);
+		GameProgressStateReactiveProperty _gameProgressState = new(GameProgressState.Nothing);
 		SphereCollider _snowBallCollider;
 
 		[Header("UI object")]
@@ -49,8 +45,9 @@ namespace MoNo.Christmas
 
 		const string SAVE_STAGE_INDEX = "StageIndex";
 
-		private void Awake()
+		protected override void Awake()
 		{
+			base.Awake();
 			if (LoadData.I == null)
 			{
 				SceneManager.LoadScene("PreLoad");
@@ -133,7 +130,7 @@ namespace MoNo.Christmas
 
 			// Collision Event
 			_snowBallCollider.OnCollisionEnterAsObservable()
-			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+			.Where(collision => collision.gameObject.TryGetComponent(out IObstacle obstacle))
 				.ThrottleFirstFrame(1)
 				.Subscribe(col =>
 				{
@@ -144,7 +141,7 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnCollisionStayAsObservable()
-			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+			.Where(collision => collision.gameObject.TryGetComponent(out IObstacle obstacle))
 			.ThrottleFirstFrame(1)
 				.Subscribe(col =>
 				{
@@ -155,7 +152,7 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnCollisionExitAsObservable()
-				.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.Where(collision => collision.gameObject.TryGetComponent(out IObstacle obstacle))
 				.ThrottleFirstFrame(1)
 				.Subscribe(col =>
 				{
@@ -167,33 +164,33 @@ namespace MoNo.Christmas
 
 			// Trigger Event
 			_snowBallCollider.OnTriggerEnterAsObservable()
-				.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+				.Where(collider1 => collider1.gameObject.TryGetComponent(out IObstacle obstacle))
 				.ThrottleFirstFrame(1)
-				.Subscribe(collider =>
+				.Subscribe(collider1 =>
 				{
-					if (collider.TryGetComponent(out IObstacle obstacle))
+					if (collider1.TryGetComponent(out IObstacle obstacle))
 					{
 						obstacle.OnEnterEvent(_snowBall);
 					}
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnTriggerStayAsObservable()
-			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+			.Where(collider1 => collider1.gameObject.TryGetComponent(out IObstacle obstacle))
 				.ThrottleFirstFrame(1)
-				.Subscribe(collider =>
+				.Subscribe(collider1 =>
 				{
-					if (collider.TryGetComponent(out IObstacle obstacle))
+					if (collider1.TryGetComponent(out IObstacle obstacle))
 					{
 						obstacle.OnStayEvent(_snowBall);
 					}
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnTriggerExitAsObservable()
-			.Where(collider => collider.gameObject.TryGetComponent(out IObstacle obstacle))
+			.Where(collider1 => collider1.gameObject.TryGetComponent(out IObstacle obstacle))
 				.ThrottleFirstFrame(1)
-				.Subscribe(collider =>
+				.Subscribe(collider1 =>
 				{
-					if (collider.TryGetComponent(out IObstacle obstacle))
+					if (collider1.TryGetComponent(out IObstacle obstacle))
 					{
 						obstacle.OnExitEvent(_snowBall);
 					}
@@ -201,9 +198,9 @@ namespace MoNo.Christmas
 
 			// Trigger Event
 			_snowBallCollider.OnTriggerEnterAsObservable()
-				.Subscribe(collider =>
+				.Subscribe(collider1 =>
 				{
-					if (collider.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+					if (collider1.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
 					{
 						duplicatable.OnEnterEvent(_snowBall);
 					}
@@ -211,18 +208,18 @@ namespace MoNo.Christmas
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnTriggerStayAsObservable()
-				.Subscribe(collider =>
+				.Subscribe(collider1 =>
 				{
-					if (collider.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+					if (collider1.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
 					{
 						duplicatable.OnStayEvent(_snowBall);
 					}
 				}).AddTo(this).AddTo(_snowBallCollider);
 
 			_snowBallCollider.OnTriggerExitAsObservable()
-			.Subscribe(collider =>
+			.Subscribe(collider1 =>
 			{
-				if (collider.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+				if (collider1.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
 				{
 					duplicatable.OnExitEvent(_snowBall);
 				}
@@ -281,7 +278,7 @@ namespace MoNo.Christmas
 			interstitialAd.ShowIfLoaded();
 		}
 
-		public void NextStage()
+		private void NextStage()
 		{
 
 			var currentStageIndex = SceneManager.GetActiveScene().buildIndex;
@@ -307,7 +304,7 @@ namespace MoNo.Christmas
 			Going,
 			Result,
 			GameOver,
-			nothing,
+			Nothing,
 		}
 		[System.Serializable]
 		public class GameProgressStateReactiveProperty : ReactiveProperty<GameProgressState>

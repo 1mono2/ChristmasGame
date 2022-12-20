@@ -16,11 +16,12 @@ namespace MoNo.Christmas
 
 		public async void OnEnterEvent(SnowBallBehavior snowball)
 		{
-			CoinManager.I.AddCoin(1, this.transform.position);
+			var position = this.transform.position;
+			CoinManager.I.AddCoin(1, position);
 			_coinObj.SetActive(false);
-			var _breakEffect = Instantiate(_breakEffectPref, this.transform.position, Quaternion.identity);
-			_breakEffect.Play();
-			await UniTask.Delay(1000, cancellationToken: this.GetCancellationTokenOnDestroy());
+			var breakEffect = Instantiate(_breakEffectPref, position, Quaternion.identity);
+			breakEffect.Play();
+			UniTask.Delay(1000, cancellationToken: this.GetCancellationTokenOnDestroy()).Forget();
 			Destroy(this.gameObject);
 		}
 

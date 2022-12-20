@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace MoNo.Christmas
 		[SerializeField] Image _coinImagePref;
 		[SerializeField] float _coinMoveSpeed = 0.8f;
 
+		private Tween _coinImageMovement;
+
 		void Start()
 		{
 			_camera = Camera.main;
@@ -31,15 +34,26 @@ namespace MoNo.Christmas
 			.Skip(1)
 				.Subscribe(worldPosition =>
 				{
-					var coinImage = Instantiate(_coinImagePref, _camera.WorldToScreenPoint(worldPosition), Quaternion.identity, this.transform);
-					coinImage.rectTransform.DOMove(_coinImage.transform.position, _coinMoveSpeed)
-					.OnComplete(() =>
+					if (_camera != null)
 					{
-						Destroy(coinImage.gameObject);
-					});
+						var coinImage = Instantiate(_coinImagePref,
+							_camera.WorldToScreenPoint(worldPosition),
+							Quaternion.identity,
+							this.transform);
+						_coinImageMovement = coinImage.rectTransform.DOMove(_coinImage.transform.position, _coinMoveSpeed)
+							.OnComplete(() =>
+							{
+								Destroy(coinImage.gameObject);
+							});
+					}
 				}).AddTo(this);
 		}
 
-
+		private void OnDestroy()
+		{
+			_coinImageMovement?.Kill();
+		}
+		
+		
 	}
 }
