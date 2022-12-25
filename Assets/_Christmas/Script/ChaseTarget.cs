@@ -11,34 +11,66 @@ namespace MoNo.Christmas
 	public class ChaseTarget : MonoBehaviour
 	{
 		[SerializeField] GameObject target;
-		Vector3 diff = Vector3.zero;
-		IDisposable disposableChase;
+		[SerializeField] Axis position = new Axis(true, true, true);
+		[SerializeField] Axis rotation = new Axis(true, true, true);
+		private Vector3 _diffPosition = Vector3.zero;
+		private Quaternion _diffRotation = new();
+		private IDisposable _disposableChase;
 
 
 		public void StartChase()
 		{
 			if (!target) { Debug.LogAssertion("Set target"); return; }
-			disposableChase?.Dispose();
+			_disposableChase?.Dispose();
 
-			disposableChase = this.UpdateAsObservable()
+			_disposableChase = this.UpdateAsObservable()
 				.Subscribe(_ =>
 				{
+					Vector3 nextPosition = Vector3.zero;
 					if (target != null)
-						this.gameObject.transform.position = target.transform.position + diff;
+					{
+						
+						gameObject.transform.position = target.transform.position + _diffPosition;
+					}
 				});
 		}
 
 		public void StopChase()
 		{
-			disposableChase?.Dispose();
+			_disposableChase?.Dispose();
 		}
 
 
-		public void SetTarget(GameObject target)
+		public void SetTarget(GameObject targetObj)
 		{
-			this.target = target;
-			if (diff == Vector3.zero) diff = this.gameObject.transform.position - target.transform.position;
+			this.target = targetObj;
+			if (_diffPosition == Vector3.zero) _diffPosition = this.gameObject.transform.position - targetObj.transform.position;
 		}
 
 	}
+	
+	[Serializable]
+	public struct Axis{
+		[SerializeField] private bool _x;
+		[SerializeField] private bool _y;
+		[SerializeField] private bool _z;
+
+		public bool X => _x;
+		public bool Y => _y;
+		public bool Z => _z;
+		public Axis(bool x, bool y, bool z)
+		{
+			_x = x;
+			_y = y;
+			_z = z;
+		}
+		
+		public void SetAxis(bool x, bool y, bool z)
+		{
+			_x = x;
+			_y = y;
+			_z = z;
+		}
+	}
+	
 }

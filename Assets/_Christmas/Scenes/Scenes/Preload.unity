@@ -197,11 +197,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   adType: 1
-  selectedPlacementIndex: 0
-  androidAdUnitId: ca-app-pub-3940256099942544/1033173712
-  iOSAdUnitId: ca-app-pub-3940256099942544/4411468910
+  selectedPlacementIndex: 1
+  androidAdUnitId: ca-app-pub-1767951001352951/2177770926
+  iOSAdUnitId: ca-app-pub-1767951001352951/3106326322
   persistent: 1
-  autoLoadEnabled: 0
+  autoLoadEnabled: 1
   onAdLoaded:
     m_PersistentCalls:
       m_Calls: []
@@ -277,6 +277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isShowAd: 1
+  _bannerAdGameObject: {fileID: 1797358928}
 --- !u!1 &1797358927
 GameObject:
   m_ObjectHideFlags: 0
@@ -307,9 +308,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   adType: 0
-  selectedPlacementIndex: 0
-  androidAdUnitId: ca-app-pub-3940256099942544/6300978111
-  iOSAdUnitId: ca-app-pub-3940256099942544/2934735716
+  selectedPlacementIndex: 1
+  androidAdUnitId: ca-app-pub-1767951001352951/3215520425
+  iOSAdUnitId: ca-app-pub-1767951001352951/3898046705
   persistent: 1
   autoLoadEnabled: 1
   adSize:

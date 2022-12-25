@@ -130,12 +130,12 @@ MonoBehaviour:
   sphereCollider: {fileID: 97991124681040455}
   rigidbody: {fileID: 97991124681040454}
   lean: {fileID: 5724102842427957774}
-  _damping: 10
-  _horizontalMoveSpeed: 0.2
+  _damping: 1.5
+  _horizontalMoveSpeed: 0.4
   _moveSpeed: 13
   _endPoint: {x: -4, y: 4}
   sphereRotateSpeed: 400
-  _jumpPower: 500
+  _jumpPower: 700
   meltingSnowPref: {fileID: 8135631377352097108, guid: ac8f6ba105a6e41ccb3ee2c47deb9e6b,
     type: 3}
   breakSnowPref: {fileID: 8135631377352097108, guid: 3cd6967d7c1344e9bb39b5b93acbaa4c,

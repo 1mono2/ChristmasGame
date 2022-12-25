@@ -14,6 +14,8 @@ namespace MoNo.Christmas
         protected override bool DontDestroy => true;
 
         [SerializeField] bool _isShowAd = true;
+        [SerializeField] private BannerAdGameObject _bannerAdGameObject;
+        
         public bool isShowAd => _isShowAd;
         const string SAVE_STAGE_INDEX = "StageIndex";
 
@@ -31,11 +33,7 @@ namespace MoNo.Christmas
             MobileAds.Initialize(initStatus =>
             {
                 // AdMobからのコールバックはメインスレッドで呼び出される保証がないため、次のUpdate()で呼ばれるようにMobileAdsEventExecutorを使用
-                MobileAdsEventExecutor.ExecuteInUpdate(() =>
-                {
-                    // バナーをリクエスト
-                    RequestAds();
-                });
+                MobileAdsEventExecutor.ExecuteInUpdate(RequestAds);
             });
 
         }
@@ -45,9 +43,8 @@ namespace MoNo.Christmas
         {
             if (_isShowAd == false) return;
             // banner is shown.
-            BannerAdGameObject bannerAd = MobileAds.Instance.GetAd<BannerAdGameObject>("BannerAd");
-            bannerAd.LoadAd();
-            
+            if (_bannerAdGameObject) _bannerAdGameObject.LoadAd();
+
         }
 
         private void Start()

@@ -14,7 +14,7 @@ namespace MoNo.Christmas
 	{
 		public SphereCollider Collider => sphereCollider;
 		[SerializeField] SphereCollider sphereCollider;
-		[SerializeField] private Rigidbody rigidbody;
+		[SerializeField] new Rigidbody rigidbody;
 		[SerializeField] LeanMultiUpdate lean;
 		[Header("Move property")]
 		[SerializeField] float _damping = 10f;
@@ -179,6 +179,7 @@ namespace MoNo.Christmas
 		{
 			_onDisapearEvent.Invoke();
 			_onDisapearEvent.RemoveAllListeners();
+			this.gameObject.SetActive(false);
 		}
 
 		private void OnDestroy()
