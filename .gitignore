@@ -32,6 +32,9 @@ Export/
 .editorconfig
 .vscode/
 .vsconfig
+.idea/
+*.DotSettings
+*.code-workspace
 
 # Gradle cache directory
 .gradle/
@@ -66,8 +69,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
-/[Bb]uild/
-/[Bb]uilds/
 
 # Crashlytics generated file
 crashlytics-build.propertiess
