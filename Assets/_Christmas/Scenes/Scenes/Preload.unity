@@ -276,7 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20ab6de1265c4408f8addc81963e5b7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isShowAd: 1
+  _isShowAd: 0
   _bannerAdGameObject: {fileID: 1797358928}
 --- !u!1 &1797358927
 GameObject:

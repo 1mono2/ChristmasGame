@@ -5,6 +5,7 @@ using GoogleMobileAds.Common;
 using GoogleMobileAds.Placement;
 using System;
 using MoNo.Utility;
+using Cysharp.Threading.Tasks;
 
 
 namespace MoNo.Christmas
@@ -25,8 +26,12 @@ namespace MoNo.Christmas
             base.Awake();
 
 # if UNITY_IOS
-            AppTrackingTranceparencyCheck att = new AppTrackingTranceparencyCheck();
-            StartCoroutine(att.Check());
+	        
+            AppTrackingTransparencyCheck att = new();
+            UniTask.Void(async () =>
+			{
+				await att.Check();
+			});
 #endif
 
             // Google Admob

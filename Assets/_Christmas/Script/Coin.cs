@@ -14,7 +14,7 @@ namespace MoNo.Christmas
 		[SerializeField] GameObject _coinObj;
 		[SerializeField] VisualEffect _breakEffectPref;
 
-		public async void OnEnterEvent(SnowBallBehavior snowball)
+		public void OnEnterEvent(SnowBallBehavior snowball)
 		{
 			var position = this.transform.position;
 			CoinManager.I.AddCoin(1, position);
