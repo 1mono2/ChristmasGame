@@ -176,7 +176,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1257198859}
-  - component: {fileID: 1257198858}
+  - component: {fileID: 1257198860}
   m_Layer: 0
   m_Name: InterstitialAd
   m_TagString: Untagged
@@ -184,39 +184,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1257198858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1257198857}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 403243224, guid: a1b1ab44b4414d64bd404c895fbd1eab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  adType: 1
-  selectedPlacementIndex: 1
-  androidAdUnitId: ca-app-pub-1767951001352951/2177770926
-  iOSAdUnitId: ca-app-pub-1767951001352951/3106326322
-  persistent: 1
-  autoLoadEnabled: 1
-  onAdLoaded:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdFailedToLoad:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdOpening:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdClosed:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdLeavingApplication:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1257198859
 Transform:
   m_ObjectHideFlags: 0
@@ -232,6 +199,32 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1257198860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257198857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb7f5fa4c14f451eb6009516b882a7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  adUnitIdAndroid: ca-app-pub-1767951001352951/2177770926
+  adUnitIdiOS: ca-app-pub-1767951001352951/3106326322
+  OnAdLoaded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAdFailedToLoad:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAdOpening:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAdClosed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1275580893
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,8 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20ab6de1265c4408f8addc81963e5b7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isShowAd: 0
-  _bannerAdGameObject: {fileID: 1797358928}
+  _isShowAd: 1
 --- !u!1 &1797358927
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,7 +279,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1797358929}
-  - component: {fileID: 1797358928}
   m_Layer: 0
   m_Name: BannerAd
   m_TagString: Untagged
@@ -295,46 +286,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1797358928
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1797358927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -287287577, guid: a1b1ab44b4414d64bd404c895fbd1eab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  adType: 0
-  selectedPlacementIndex: 1
-  androidAdUnitId: ca-app-pub-1767951001352951/3215520425
-  iOSAdUnitId: ca-app-pub-1767951001352951/3898046705
-  persistent: 1
-  autoLoadEnabled: 1
-  adSize:
-    type: 2
-    width: -1
-    height: 50
-    orientation: 0
-  adPosition: 1
-  adPositionOffset: {x: 0, y: 0}
-  onAdLoaded:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdFailedToLoad:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdOpening:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdClosed:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdLeavingApplication:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1797358929
 Transform:
   m_ObjectHideFlags: 0

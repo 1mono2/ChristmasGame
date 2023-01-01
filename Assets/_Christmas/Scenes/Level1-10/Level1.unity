@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 5356364469493695498}
-  m_IndirectSpecularColor: {r: 0.08249775, g: 0.13392335, b: 0.24064353, a: 1}
+  m_IndirectSpecularColor: {r: 0.08306655, g: 0.1346797, b: 0.24211392, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -27380,17 +27380,17 @@ PrefabInstance:
     - target: {fileID: 3792316028196592474, guid: d502d8f2cb3c24822bf0e9c4efe0c436,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3792316028196592474, guid: d502d8f2cb3c24822bf0e9c4efe0c436,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3792316028196592474, guid: d502d8f2cb3c24822bf0e9c4efe0c436,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3792316028196592474, guid: d502d8f2cb3c24822bf0e9c4efe0c436,
         type: 3}
@@ -32242,7 +32242,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9292453, g: 0.99417096, b: 1, a: 1}
   m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
@@ -32300,14 +32300,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5356364469493695733}
-  m_LocalRotation: {x: 0.75898993, y: -0.253374, z: 0.18992147, w: 0.5689164}
+  m_LocalRotation: {x: 0.62363183, y: -0.0523526, z: 0.4779364, w: 0.61637604}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8220175217445930384}
   m_RootOrder: 12
-  m_LocalEulerAnglesHint: {x: 106.29199, y: 0, z: 36.921005}
+  m_LocalEulerAnglesHint: {x: 125.033005, y: 247.823, z: 294.13098}
 --- !u!1 &5356364469493695733
 GameObject:
   m_ObjectHideFlags: 0

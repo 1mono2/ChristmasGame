@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GoogleMobileAds.Api;
-using GoogleMobileAds.Placement;
+//using GoogleMobileAds.Placement;
 using MoNo.Utility;
 using UniRx;
 using UniRx.Diagnostics;
@@ -121,7 +123,7 @@ namespace MoNo.Christmas
 				.Subscribe(radius =>
 				{
 					_goingCanvas.countText.text = radius.ToString("F2");
-				});
+				}).AddTo(this).AddTo(_snowBall.gameObject);
 
 			_snowBall.OnDisapearEvent.AddListener(() =>
 			{
@@ -247,6 +249,7 @@ namespace MoNo.Christmas
 
 			if (LoadData.I.isShowAd == true)
 			{
+				
 				_resultCanvas.nextLevelButton.onClick.AddListener(ShowAds);
 			}
 			else
@@ -262,20 +265,17 @@ namespace MoNo.Christmas
 			_mainCamera.StartChase();
 		}
 
-		void SaveStageIndex()
+		static void SaveStageIndex()
 		{
 			PlayerPrefs.SetInt(SAVE_STAGE_INDEX, SceneManager.GetActiveScene().buildIndex);
 		}
 
 		void ShowAds()
 		{
-			var interstitialAd = MobileAds.Instance.GetAd<InterstitialAdGameObject>("InterstitialAd");
-			interstitialAd.LoadAd();
-			interstitialAd.InterstitialAd.OnAdClosed += (sender, args) =>
-			{
-				NextStage();
-			};
-			interstitialAd.ShowIfLoaded();
+			InterstitialAds.I.OnAdClosed.AddListener(NextStage); 
+
+			InterstitialAds.I.ShowIfLoaded();
+			
 		}
 
 		private void NextStage()
@@ -296,7 +296,6 @@ namespace MoNo.Christmas
 			SceneManager.LoadScene(nextStageIndex);
 
 		}
-
 
 		public enum GameProgressState
 		{
