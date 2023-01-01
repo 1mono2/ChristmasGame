@@ -1,25 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using TMPro;
-using UniRx.Triggers;
 
 namespace MoNo.Christmas
 {
 
-    public class GameOverCanvasBehavior : MonoBehaviour
-    {
+	public class GameOverCanvasBehavior : MonoBehaviour
+	{
 
-        [SerializeField] Canvas gameOverCanvas;
-        [SerializeField] Button retryButton;
+		public Canvas gameOverCanvas;
+		public Button retryButton;
 
-        public UnityAction retryButtonAction;
 
-        void Start()
-        {
-            retryButton.onClick.AddListener(retryButtonAction);
-        }
-    }
+	}
 }

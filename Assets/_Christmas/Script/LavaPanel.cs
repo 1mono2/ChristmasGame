@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using MoNo.Christmas;
 using UnityEngine;
 
-public class LavaPanel : MonoBehaviour, IObstacle
+namespace MoNo.Christmas
 {
-	public void OnEnterEvent(SnowBallBehavior1 snowball)
+	public class LavaPanel : MonoBehaviour, IObstacle
 	{
-		Debug.Log("Enter lava zone");
-	}
+		public void OnEnterEvent(SnowBallBehavior snowball)
+		{
+			Debug.Log("Enter lava zone");
+		}
 
-	public void OnStayEvent(SnowBallBehavior1 snowball)
-	{
-		snowball.DownSize();
-	}
+		public void OnStayEvent(SnowBallBehavior snowball)
+		{
+			snowball.DownSize();
+		}
 
-	public void OnExitEvent(SnowBallBehavior1 snowball)
-	{
-		Debug.Log("Exit lava zone");
+		public void OnExitEvent(SnowBallBehavior snowball)
+		{
+			Debug.Log("Exit lava zone");
+		}
 	}
 }

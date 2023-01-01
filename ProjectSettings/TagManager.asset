@@ -4,14 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - CamStopper
   - GoalFlag
-  - Pin
-  - Snow
   - Magma
   - Disappear
-  - DeltaMode
-  - TransformMode
   layers:
   - Default
   - TransparentFX

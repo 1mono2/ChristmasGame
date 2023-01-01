@@ -3,22 +3,25 @@ using System.Collections.Generic;
 using MoNo.Christmas;
 using UnityEngine;
 
-public class SnowPanel : MonoBehaviour, IObstacle
+namespace MoNo.Christmas
 {
-	public void OnEnterEvent(SnowBallBehavior1 snowball)
+	public class SnowPanel : MonoBehaviour, IObstacle
 	{
-		Debug.Log("Enter snow zone");
+		public void OnEnterEvent(SnowBallBehavior snowball)
+		{
+			Debug.Log("Enter snow zone");
+		}
+
+		public void OnStayEvent(SnowBallBehavior snowball)
+		{
+			snowball.UpSize();
+		}
+
+		public void OnExitEvent(SnowBallBehavior snowball)
+		{
+			Debug.Log("Exit snow zone");
+		}
+
+
 	}
-
-	public void OnStayEvent(SnowBallBehavior1 snowball)
-	{
-		snowball.UpSize();
-	}
-
-	public void OnExitEvent(SnowBallBehavior1 snowball)
-	{
-		Debug.Log("Exit snow zone");
-	}
-
-
 }

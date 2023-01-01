@@ -9,9 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 97991124681040448}
-  - component: {fileID: 97991124681040453}
   - component: {fileID: 97991124681040455}
   - component: {fileID: 97991124681040454}
+  - component: {fileID: 5724102842427957774}
+  - component: {fileID: 1078458763}
   m_Layer: 6
   m_Name: SnowBall
   m_TagString: Untagged
@@ -28,31 +29,13 @@ Transform:
   m_GameObject: {fileID: 97991124681040575}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5876676418870578438}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &97991124681040453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 97991124681040575}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d7bc6657c6894779875adfafa0ebc73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meltingSnowPref: {fileID: 8135631377352097108, guid: ac8f6ba105a6e41ccb3ee2c47deb9e6b,
-    type: 3}
-  breakSnowPref: {fileID: 8135631377352097108, guid: 3cd6967d7c1344e9bb39b5b93acbaa4c,
-    type: 3}
-  _endPoint: {x: -4, y: 4}
-  sphereRotateSpeed: 10
 --- !u!135 &97991124681040455
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -80,8 +63,83 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &5724102842427957774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 97991124681040575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5726d77b04f1a53448ffb9873ac0e474, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Use:
+    Filter: 0
+    IgnoreStartedOverGui: 1
+    RequiredFingerCount: 0
+    RequiredMouseButtons: 0
+    RequiredSelectable: {fileID: 0}
+  ignoreIfStatic: 0
+  onFingers:
+    m_PersistentCalls:
+      m_Calls: []
+  coordinate: 2
+  multiplier: 50
+  onDelta:
+    m_PersistentCalls:
+      m_Calls: []
+  onDistance:
+    m_PersistentCalls:
+      m_Calls: []
+  ScreenDepth:
+    Conversion: 1
+    Camera: {fileID: 0}
+    Object: {fileID: 0}
+    Layers:
+      serializedVersion: 2
+      m_Bits: 4294967291
+    Distance: 0
+  onWorldFrom:
+    m_PersistentCalls:
+      m_Calls: []
+  onWorldTo:
+    m_PersistentCalls:
+      m_Calls: []
+  onWorldDelta:
+    m_PersistentCalls:
+      m_Calls: []
+  onWorldFromTo:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1078458763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 97991124681040575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d7bc6657c6894779875adfafa0ebc73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sphereCollider: {fileID: 97991124681040455}
+  rigidbody: {fileID: 97991124681040454}
+  lean: {fileID: 5724102842427957774}
+  _damping: 1.5
+  _horizontalMoveSpeed: 0.4
+  _moveSpeed: 13
+  _endPoint: {x: -4, y: 4}
+  sphereRotateSpeed: 400
+  _jumpPower: 700
+  meltingSnowPref: {fileID: 8135631377352097108, guid: ac8f6ba105a6e41ccb3ee2c47deb9e6b,
+    type: 3}
+  breakSnowPref: {fileID: 8135631377352097108, guid: 3cd6967d7c1344e9bb39b5b93acbaa4c,
+    type: 3}
 --- !u!1001 &6198254274851334893
 PrefabInstance:
   m_ObjectHideFlags: 0

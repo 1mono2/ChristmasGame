@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
+using GoogleMobileAds.Api;
+//using GoogleMobileAds.Placement;
 using MoNo.Utility;
-using TMPro;
 using UniRx;
 using UniRx.Diagnostics;
 using UniRx.Triggers;
@@ -15,52 +13,32 @@ using Rando = UnityEngine.Random;
 
 namespace MoNo.Christmas
 {
-
-	public enum GameProgressState
-	{
-		BeforeStart,
-		Going,
-		AfterGoal,
-		Result,
-		GameOver,
-		nothing,
-	}
-	[System.Serializable]
-	public class GameProgressStateReactiveProperty1 : ReactiveProperty<GameProgressState>
-	{
-		public GameProgressStateReactiveProperty1() { }
-		public GameProgressStateReactiveProperty1(GameProgressState initialValue) : base(initialValue) { }
-	}
-
 	public class GameManager : SingletonMonoBehaviour<GameManager>
 	{
 		protected override bool DontDestroy => false;
 
 		// property
-		public GameProgressStateReactiveProperty1 gameProgressState { get { return _gameProgressState; } set { _gameProgressState = value; } }
+		public GameProgressStateReactiveProperty gameProgressState1 { get => _gameProgressState;
+			set => _gameProgressState = value;
+		}
 
 
 		[Header("Realistic object")]
-		[SerializeField] PlayerBehavior _player;
+		[SerializeField] SnowBallBehavior _snowBall;
 		[SerializeField] GameObject[] _stages;
 		[SerializeField] ParticleSystem _confettiPref;
+		[SerializeField] ChaseTarget _mainCamera;
 
 		[Header("System object")]
 		// field
-		GameProgressStateReactiveProperty1 _gameProgressState = new(GameProgressState.nothing);
-		Collider _triggerCollider;
+		GameProgressStateReactiveProperty _gameProgressState = new(GameProgressState.Nothing);
+		SphereCollider _snowBallCollider;
 
-		//[Header("UI object")]
-		//[SerializeField] Canvas _startCanvas;
-		//[SerializeField] RectTransform pinsCount;
-		//[SerializeField] TextMeshProUGUI pinsCountText;
-		//[SerializeField] TextMeshProUGUI addPinPref;
-		//[SerializeField] TextMeshProUGUI multiplyRateText;
-		//[SerializeField] StartCanvasBehavior startCanvas;
-		//[SerializeField] Canvas goingCanvas;
-		//[SerializeField] BowlingCanvasBehavior bowlingCanvas;
-		//[SerializeField] ResultCanvasBehavior resultCanvas;
-		//[SerializeField] GameOverCanvasBehavior gameOverCanvas;
+		[Header("UI object")]
+		[SerializeField] StartCanvasBehavior _startCanvas;
+		[SerializeField] GoingCanvas _goingCanvas;
+		[SerializeField] ResultCanvasBehavior _resultCanvas;
+		[SerializeField] GameOverCanvasBehavior _gameOverCanvas;
 
 
 		// hide state
@@ -69,14 +47,21 @@ namespace MoNo.Christmas
 
 		const string SAVE_STAGE_INDEX = "StageIndex";
 
+		protected override void Awake()
+		{
+			base.Awake();
+			if (LoadData.I == null)
+			{
+				SceneManager.LoadScene("PreLoad");
+				return;
+			}
 
+		}
 
 		void Start()
 		{
-			DOTween.SetTweensCapacity(1500, 50);
-
+			_snowBallCollider = _snowBall.Collider;
 			_gameProgressState.Value = GameProgressState.BeforeStart;
-			_triggerCollider = _player.triggerCollider.GetComponent<Collider>();
 
 			_gameProgressState
 				.Where(state => state == GameProgressState.BeforeStart)
@@ -93,15 +78,6 @@ namespace MoNo.Christmas
 					OnGoing();
 					Debug.Log("going");
 				});
-
-
-			_gameProgressState
-			  .Where(state => state == GameProgressState.AfterGoal)
-			  .Subscribe(state =>
-			  {
-				  OnAfterGoal();
-				  Debug.Log("AfterGoal");
-			  });
 
 
 			_gameProgressState
@@ -124,156 +100,185 @@ namespace MoNo.Christmas
 
 		}
 
-		void OnBeforeStart() { }
+		void OnBeforeStart()
+		{
+			_startCanvas.tapToStart.OnFinger.AddListener(leanFinger =>
+			{
+				_startCanvas.gameObject.SetActive(false);
+				_gameProgressState.Value = GameProgressState.Going;
+			});
+
+			_startCanvas.levelText.text = $"Level {SceneManager.GetActiveScene().buildIndex}";
+
+			SetCamera();
+		}
 
 
 		void OnGoing()
 		{
-			//goingCanvas.gameObject.SetActive(true);
+			_goingCanvas.gameObject.SetActive(true);
+
+			_snowBall.Radius
+				.Select(x => x * 2)
+				.Subscribe(radius =>
+				{
+					_goingCanvas.countText.text = radius.ToString("F2");
+				}).AddTo(this).AddTo(_snowBall.gameObject);
+
+			_snowBall.OnDisapearEvent.AddListener(() =>
+			{
+				_gameProgressState.Value = GameProgressState.GameOver;
+			});
+
+			// Collision Event
+			_snowBallCollider.OnCollisionEnterAsObservable()
+			.Where(collision => collision.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
+				.Subscribe(col =>
+				{
+					if (col.collider.TryGetComponent(out IObstacle obstacle))
+					{
+						obstacle.OnEnterEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnCollisionStayAsObservable()
+			.Where(collision => collision.gameObject.TryGetComponent(out IObstacle obstacle))
+			.ThrottleFirstFrame(1)
+				.Subscribe(col =>
+				{
+					if (col.collider.TryGetComponent(out IObstacle obstacle))
+					{
+						obstacle.OnStayEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnCollisionExitAsObservable()
+				.Where(collision => collision.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
+				.Subscribe(col =>
+				{
+					if (col.collider.TryGetComponent(out IObstacle obstacle))
+					{
+						obstacle.OnExitEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			// Trigger Event
+			_snowBallCollider.OnTriggerEnterAsObservable()
+				.Where(collider1 => collider1.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
+				.Subscribe(collider1 =>
+				{
+					if (collider1.TryGetComponent(out IObstacle obstacle))
+					{
+						obstacle.OnEnterEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnTriggerStayAsObservable()
+			.Where(collider1 => collider1.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
+				.Subscribe(collider1 =>
+				{
+					if (collider1.TryGetComponent(out IObstacle obstacle))
+					{
+						obstacle.OnStayEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnTriggerExitAsObservable()
+			.Where(collider1 => collider1.gameObject.TryGetComponent(out IObstacle obstacle))
+				.ThrottleFirstFrame(1)
+				.Subscribe(collider1 =>
+				{
+					if (collider1.TryGetComponent(out IObstacle obstacle))
+					{
+						obstacle.OnExitEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			// Trigger Event
+			_snowBallCollider.OnTriggerEnterAsObservable()
+				.Subscribe(collider1 =>
+				{
+					if (collider1.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+					{
+						duplicatable.OnEnterEvent(_snowBall);
+					}
+
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnTriggerStayAsObservable()
+				.Subscribe(collider1 =>
+				{
+					if (collider1.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+					{
+						duplicatable.OnStayEvent(_snowBall);
+					}
+				}).AddTo(this).AddTo(_snowBallCollider);
+
+			_snowBallCollider.OnTriggerExitAsObservable()
+			.Subscribe(collider1 =>
+			{
+				if (collider1.gameObject.TryGetComponent(out IDuplicatableObstacle duplicatable))
+				{
+					duplicatable.OnExitEvent(_snowBall);
+				}
+			}).AddTo(this).AddTo(_snowBallCollider);
+
+
 
 			// move
-			_player.Move();
+			_snowBall.Move();
 
-
-			_player.chain.SnowBalls.ObserveCountChanged()
-				.Skip(1)
-				.Subscribe(i =>
-				{
-					// display number of items
-					//pinsCountText.text = i.ToString();
-					if (i <= 0)
-					{
-						_gameProgressState.Value = GameProgressState.GameOver;
-					}
-				}).AddTo(this);
-
-			_triggerCollider.OnTriggerEnterAsObservable()
-				 .Subscribe(triggerObj =>
-				 {
-					 //  if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
-					 //  {
-					 // 	 int num = obstacle.Event(_player.chain.SnowBalls.Count);
-					 // 	 //var addPinText = Instantiate(addPinPref, goingCanvas.gameObject.transform);
-					 // 	 if (num > 0)
-					 // 	 {
-					 // 		 for (int i = 0; i < num; i++)
-					 // 		 {
-					 // 			 _player.SpawnSnowBall();
-					 // 		 }
-					 // 		 //addPinText.text = $"+" + num.ToString();
-					 // 	 }
-					 // 	 else
-					 // 	 {
-					 // 		 for (int i = 0; i < -num; i++)
-					 // 		 {
-					 // 			 _player.DeleteSnowBall();
-					 // 		 }
-					 // 		 //addPinText.text = num.ToString();
-					 // 	 }
-
-					 //  }
-
-					 //  if (triggerObj.TryGetComponent<PanelController>(out var panel))
-					 //  {
-					 // 	 panel.DisAppear();
-					 //  }
-				 }).AddTo(_triggerCollider).AddTo(this);
-
-
-			_triggerCollider.OnTriggerEnterAsObservable()
-				 .Subscribe(triggerObj =>
-				 {
-					 if (triggerObj.TryGetComponent<IObstacle>(out var obstacle))
-					 {
-						 //obstacle.Event(_player);
-					 }
-				 }).AddTo(_triggerCollider).AddTo(this);
-
-			_triggerCollider.OnTriggerEnterAsObservable()
-				.Where(col => col.CompareTag("TransformMode"))
-				.Subscribe(col =>
-				{
-					_player.chain.mode.Value = ChainSnowBall.ProcessMode.Transform;
-				});
-
-			_triggerCollider.OnTriggerEnterAsObservable()
-				.Where(col => col.CompareTag("DeltaMode"))
-				.Subscribe(col =>
-				{
-					_player.chain.mode.Value = ChainSnowBall.ProcessMode.Delta;
-				});
-
-
-
-
-
-			// goal flag stands
-			_triggerCollider.OnTriggerEnterAsObservable()
-				.Where(trrigerObj => trrigerObj.CompareTag("GoalFlag"))
-				.Subscribe(triggerObj =>
-				{
-					_gameProgressState.Value = GameProgressState.AfterGoal;
-
-				}).AddTo(_triggerCollider).AddTo(this);
-		}
-
-		void OnAfterGoal()
-		{
-
-			//goingCanvas.gameObject.SetActive(false);
-			//bowlingCanvas.gameObject.SetActive(true);
-			//multiplyRateText.text = $"x{multiplyRateCriterion[multiplyRate]}";
-
-			var camStopperPos = Vector3.zero;
-			Instantiate(_confettiPref, camStopperPos + new Vector3(-4, 0, 5), Quaternion.Euler(-45, 90, 0));
-			Instantiate(_confettiPref, camStopperPos + new Vector3(4, 0, 5), Quaternion.Euler(-45, -90, 0));
-
-			_stages[_multiplyRate].GetComponent<Renderer>().material.DOColor(Color.white, 1).SetLoops(-1, LoopType.Yoyo);
-
-			_triggerCollider.OnTriggerEnterAsObservable()
-				.Where(obj => obj.CompareTag("CamStopper"))
-				.Subscribe(_ =>
-				{
-					_player.Stop();
-					_gameProgressState.Value = GameProgressState.Result;
-				}).AddTo(this).AddTo(_triggerCollider);
 		}
 
 		void OnGameOver()
 		{
-			_player.Stop();
-			//gameOverCanvas.retryButtonAction += () => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-			//gameOverCanvas.gameObject.SetActive(true);
+			_goingCanvas.gameObject.SetActive(false);
+			_snowBall.Stop();
+			_gameOverCanvas.retryButton.onClick.AddListener(() => SceneManager.LoadScene(SceneManager.GetActiveScene().name));
+			_gameOverCanvas.gameObject.SetActive(true);
 		}
 
 		void OnResult()
 		{
-			//bowlingCanvas.gameObject.SetActive(false);
+			_goingCanvas.gameObject.SetActive(false);
+			_resultCanvas.gameObject.SetActive(true);
 
-			//resultCanvas.gameObject.SetActive(true);
-			//if (LoadData.I.isShowAd == true)
-			//{
-			//    resultCanvas.nextLevelButtonAction += ShowAds;
-			//}
-			//else
-			//{
-			//    resultCanvas.nextLevelButtonAction += NextStage;
-			//}
+			if (LoadData.I.isShowAd == true)
+			{
+				
+				_resultCanvas.nextLevelButton.onClick.AddListener(ShowAds);
+			}
+			else
+			{
+				_resultCanvas.nextLevelButton.onClick.AddListener(NextStage);
+			}
 			SaveStageIndex();
 		}
 
-		void SaveStageIndex()
+		void SetCamera()
+		{
+			_mainCamera.SetTarget(_snowBall.gameObject);
+			_mainCamera.StartChase();
+		}
+
+		static void SaveStageIndex()
 		{
 			PlayerPrefs.SetInt(SAVE_STAGE_INDEX, SceneManager.GetActiveScene().buildIndex);
 		}
 
 		void ShowAds()
 		{
-			//InterstitialAds.I.OnAdClosed.AddListener(NextStage);
-			//InterstitialAds.I.ShowIfLoaded();
+			InterstitialAds.I.OnAdClosed.AddListener(NextStage); 
+
+			InterstitialAds.I.ShowIfLoaded();
+			
 		}
 
-		public void NextStage()
+		private void NextStage()
 		{
 
 			var currentStageIndex = SceneManager.GetActiveScene().buildIndex;
@@ -292,6 +297,20 @@ namespace MoNo.Christmas
 
 		}
 
-
+		public enum GameProgressState
+		{
+			BeforeStart,
+			Going,
+			Result,
+			GameOver,
+			Nothing,
+		}
+		[System.Serializable]
+		public class GameProgressStateReactiveProperty : ReactiveProperty<GameProgressState>
+		{
+			public GameProgressStateReactiveProperty() { }
+			public GameProgressStateReactiveProperty(GameProgressState initialValue) : base(initialValue) { }
+		}
 	}
+
 }

@@ -1,160 +1,192 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
+using Lean.Touch;
+using MoNo.Utility;
 using UniRx;
 using UniRx.Diagnostics;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class SnowBallBehavior : MonoBehaviour
+namespace MoNo.Christmas
 {
-	[SerializeField] ParticleSystem meltingSnowPref;
-	[SerializeField] ParticleSystem breakSnowPref;
-
-	public IReadOnlyReactiveProperty<float> Radius => radius;
-
-	readonly ReactiveProperty<float> radius = new(1f);
-
-	public IObservable<Unit> OnDestroyAsync => onDestroyAsync;
-	private readonly AsyncSubject<Unit> onDestroyAsync = new();
-
-	[SerializeField] Vector2 _endPoint = new(-4, 4);
-	[SerializeField] float sphereRotateSpeed = 1f;
-
-	const float radiusCriterion = 0.25f;
-	const float ballSizeIncreaseUnit = 1.0f;
-	const float ballSizeDecreaseUnit = -1.5f;
-
-	void Start()
+	public class SnowBallBehavior : MonoBehaviour
 	{
-		radius.Value = this.transform.localScale.x / 2;
-		// if it make the snowball smaller than the criterion, the snowball is destroyed.
-		radius
-			.Where(_radius => _radius < radiusCriterion)
-			.Subscribe(_radius =>
-			{
-				Destroy(this.gameObject);
-			}).AddTo(this);
+		public SphereCollider Collider => sphereCollider;
+		[SerializeField] SphereCollider sphereCollider;
+		[SerializeField] new Rigidbody rigidbody;
+		[SerializeField] LeanMultiUpdate lean;
+		[Header("Move property")]
+		[SerializeField] float _damping = 10f;
+		[SerializeField] float _horizontalMoveSpeed = 0.2f;
+		[SerializeField] float _moveSpeed = 15f;
+		Vector3 _remainingDelta = Vector3.zero;
+		IDisposable _disposableMove;
+		[SerializeField] Vector2 _endPoint = new(-4, 4);
+		[SerializeField] float sphereRotateSpeed = 10f;
+		[SerializeField] float _jumpPower = 1.0f;
+		
 
-		// Obstacle
-		this.OnCollisionEnterAsObservable()
-			.Where(collision => collision.collider.CompareTag("Magma"))
-			.Subscribe(_ =>
-			{
-				Break(-20);
-			}).AddTo(this);
+		[Header("Radius property")]
+		readonly ReactiveProperty<float> _radius = new(1f);
+		public IReadOnlyReactiveProperty<float> Radius => _radius;
+		const float RadiusCriterion = 0.25f;
+		const float BallSizeIncreaseUnit = 2.0f;
+		const float BallSizeDecreaseUnit = -2.5f;
 
-		// Snow & Magma
-		this.OnTriggerEnterAsObservable()
-			.Where(collider => collider.CompareTag("Snow"))
-			.Subscribe(_ =>
-			{
-				Debug.Log("Enter Snow Zone");
-			}).AddTo(this);
+		[Header("Effect")]
+		[SerializeField] ParticleSystem meltingSnowPref;
+		[SerializeField] ParticleSystem breakSnowPref;
 
-		this.OnTriggerEnterAsObservable()
-			.Where(collider => collider.CompareTag("Magma"))
-			.Subscribe(_ =>
-			{
-				Debug.Log("Enter Magma Zone");
-			}).AddTo(this);
+		[HideInInspector] public UnityEvent OnDisapearEvent => _onDisapearEvent;
+		readonly UnityEvent _onDisapearEvent = new();
 
-		this.OnTriggerStayAsObservable()
-			.Where(collider => collider.CompareTag("Snow"))
-			.BatchFrame(1, FrameCountType.Update)
-			.Subscribe(_ => ChangeSphereSize(ballSizeIncreaseUnit)).AddTo(this);
 
-		this.OnTriggerStayAsObservable()
-			.Where(collider => collider.CompareTag("Magma"))
-			.BatchFrame(1, FrameCountType.Update)
-			.Subscribe(_ => ChangeSphereSize(ballSizeDecreaseUnit)).AddTo(this);
 
-		this.OnTriggerExitAsObservable()
-			.Where(collider => collider.CompareTag("Snow"))
-			.Subscribe(_ =>
-			{
-				Debug.Log("Exit Snow Zone");
-			}).AddTo(this);
-
-		this.OnTriggerExitAsObservable()
-			.Where(collider => collider.CompareTag("Magma"))
-			.Subscribe(_ =>
-			{
-				Debug.Log("Exit Magma Zone");
-			}).AddTo(this);
-
-		// Disapper this gameobject, entering the "disappear zone"
-		this.OnTriggerEnterAsObservable()
-		.Where(collider => collider.CompareTag("Disappear"))
-		.Subscribe(_ => Destroy(this.gameObject)).AddTo(this);
-
-	}
-
-	public void FixedUpdatePosition(Vector3 deltaPos)
-	{
-
-		// 前のBallの大きさの変更でPositionを変更する挙動は複雑になりそうなのでパス
-		Transform finalTransform = this.transform;
-		if (finalTransform.position.x < _endPoint.x && Mathf.Sign(deltaPos.x) < 0) // left side
+		void Start()
 		{
-			deltaPos = new Vector3(0, deltaPos.y, deltaPos.z);
+			lean.OnDelta.AddListener(MoveHorizontal);
+			_radius.Value = this.transform.localScale.x / 2;
+			// if it make the snowball smaller than the criterion, the snowball is destroyed.
+			_radius
+				.Where(radius => radius < RadiusCriterion)
+				.Subscribe(_ =>
+				{
+					var breakSnow = Instantiate(breakSnowPref, this.transform.position, Quaternion.identity);
+					breakSnow.Play();
+					OnDisapear();
+				}).AddTo(this);
+
 		}
-		else if (finalTransform.position.x > _endPoint.y && Mathf.Sign(deltaPos.x) > 0)
+
+		public void Move()
 		{
-			deltaPos = new Vector3(0, deltaPos.y, deltaPos.z);
+			_disposableMove?.Dispose();
+			_disposableMove = this.FixedUpdateAsObservable()
+								.Subscribe(_ =>
+								{
+									FixedUpdatePosition();
+								});
 		}
-		finalTransform.position += deltaPos;
 
-		RotateBall();
+		public void Stop()
+		{
+			_disposableMove?.Dispose();
+		}
+
+		public void ResetSpeed()
+		{
+			_remainingDelta = Vector3.zero;
+		}
+
+
+		private void FixedUpdatePosition()
+		{
+			MoveForward();
+			var fact = DampenFactor(_damping, Time.fixedDeltaTime);
+			var newDelta = Vector3.Lerp(_remainingDelta, Vector3.zero, fact);
+			var deltaDelta = _remainingDelta - newDelta;
+			_remainingDelta = newDelta;
+
+			Transform finalTransform = this.transform;
+			if (finalTransform.position.x < _endPoint.x && Mathf.Sign(deltaDelta.x) < 0) // left side
+			{
+				deltaDelta = new Vector3(0, deltaDelta.y, deltaDelta.z);
+			}
+			else if (finalTransform.position.x > _endPoint.y && Mathf.Sign(deltaDelta.x) > 0)
+			{
+				deltaDelta = new Vector3(0, deltaDelta.y, deltaDelta.z);
+			}
+			finalTransform.position += deltaDelta;
+
+			RotateBall(deltaDelta);
+		}
+
+		void MoveForward()
+		{
+			_remainingDelta += new Vector3(0, 0, _moveSpeed * Time.fixedDeltaTime);
+		}
+
+
+		void MoveHorizontal(Vector2 magnitude)
+		{
+			var horizontalDelta = _horizontalMoveSpeed * magnitude.x * Vector3.right;
+			_remainingDelta += horizontalDelta;
+
+
+		}
+
+		static float DampenFactor(float speed, float elapsed)
+		{
+			if (speed < 0.0f)
+			{
+				return 1.0f;
+			}
+
+#if UNITY_EDITOR
+			if (Application.isPlaying == false)
+			{
+				return 1.0f;
+			}
+#endif
+
+			return 1.0f - Mathf.Pow((float)System.Math.E, -speed * elapsed);
+		}
+		
+		void RotateBall(Vector3 delta)
+		{
+
+			//this.transform.Rotate(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
+			var axis = Vector3.Cross(delta, Vector3.down); //  find axis from direcition using Cross()
+			this.transform.Rotate(axis, sphereRotateSpeed * Time.fixedDeltaTime, Space.World);
+		}
+
+		public void UpSize()
+		{
+			ChangeSphereSize(BallSizeIncreaseUnit);
+			var meltingSnowPos = this.transform.position + _radius.Value * Vector3.down;
+			var meltingSnow = Instantiate(meltingSnowPref, meltingSnowPos, Quaternion.identity);
+			meltingSnow.Play();
+		}
+
+		public void DownSize()
+		{
+			ChangeSphereSize(BallSizeDecreaseUnit);
+			var meltingSnow = Instantiate(meltingSnowPref, this.transform.position, Quaternion.identity);
+			meltingSnow.Play();
+		}
+		public void Break()
+		{
+			ChangeSphereSize(-20);
+			var breakSnow = Instantiate(breakSnowPref, this.transform.position, Quaternion.identity);
+			breakSnow.Play();
+		}
+
+		void ChangeSphereSize(float unit)
+		{
+			Transform thisTransform = transform;
+			float multiplyTime = unit * Time.fixedDeltaTime;
+			thisTransform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
+			_radius.Value = thisTransform.localScale.x / 2;
+		}
+
+		public void Jump()
+		{
+			rigidbody.AddForce(new Vector3(0, 1, -0.5f) * _jumpPower, ForceMode.Force);
+		}
+
+		public void OnDisapear()
+		{
+			_onDisapearEvent.Invoke();
+			_onDisapearEvent.RemoveAllListeners();
+			this.gameObject.SetActive(false);
+		}
+
+		private void OnDestroy()
+		{
+			this.transform.DOKill();
+			Debug.Log("Destroy: " + gameObject.name);
+		}
+
 	}
-
-	public void FixedUpdateTransPos(Vector3 transformPos)
-	{
-		var newPos = new Vector3(transformPos.x, transformPos.y + radius.Value, transformPos.z);
-		this.transform.position = newPos;
-
-		RotateBall();
-	}
-
-	void RotateBall()
-	{
-
-		this.transform.RotateAroundLocal(Vector3.right, sphereRotateSpeed * Time.fixedDeltaTime);
-		// var axis = Vector3.Cross(deltaDelta.normalized, Vector3.down); //  find axis from direcition using Cross()
-		// this.transform.RotateAroundLocal(dir, sphereRotateSpeed * Time.fixedDeltaTime);
-	}
-
-	public void ChangeSphereSize(float unit)
-	{
-		float multiplyTime = unit * Time.fixedDeltaTime;
-		this.transform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
-		radius.Value = this.transform.localScale.x / 2;
-		var meltingSnow = Instantiate(meltingSnowPref, this.transform.position, Quaternion.identity);
-		meltingSnow.Play();
-	}
-
-	public void Break(float unit)
-	{
-		float multiplyTime = unit * Time.fixedDeltaTime;
-		this.transform.DOBlendableScaleBy(Vector3.one * multiplyTime, 0);
-		radius.Value = this.transform.localScale.x / 2;
-		var breakSnow = Instantiate(breakSnowPref, this.transform.position, Quaternion.identity);
-		breakSnow.Play();
-	}
-
-
-	public void AddPos(Vector3 vector3)
-	{
-		this.transform.position += vector3;
-	}
-
-	private void OnDestroy()
-	{
-		onDestroyAsync.OnNext(Unit.Default);
-		onDestroyAsync.OnCompleted();
-		onDestroyAsync.Dispose();
-		Debug.Log("Destroy: " + gameObject.name);
-	}
-
 }

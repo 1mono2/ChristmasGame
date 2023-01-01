@@ -123,6 +123,108 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &1090040976
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1090040978}
+  - component: {fileID: 1090040977}
+  m_Layer: 0
+  m_Name: CoinManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1090040977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1090040976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b1225a8b19f4dddbf9fb9279e3bf43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1090040978
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1090040976}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2, y: 0.5, z: 36}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1257198857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1257198859}
+  - component: {fileID: 1257198860}
+  m_Layer: 0
+  m_Name: InterstitialAd
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1257198859
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257198857}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1257198860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257198857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb7f5fa4c14f451eb6009516b882a7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  adUnitIdAndroid: ca-app-pub-1767951001352951/2177770926
+  adUnitIdiOS: ca-app-pub-1767951001352951/3106326322
+  OnAdLoaded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAdFailedToLoad:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAdOpening:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAdClosed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1275580893
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +279,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1797358929}
-  - component: {fileID: 1797358928}
   m_Layer: 0
   m_Name: BannerAd
   m_TagString: Untagged
@@ -185,46 +286,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1797358928
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1797358927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -287287577, guid: a1b1ab44b4414d64bd404c895fbd1eab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  adType: 0
-  selectedPlacementIndex: 0
-  androidAdUnitId: ca-app-pub-3940256099942544/6300978111
-  iOSAdUnitId: ca-app-pub-3940256099942544/2934735716
-  persistent: 0
-  autoLoadEnabled: 1
-  adSize:
-    type: 2
-    width: -1
-    height: 50
-    orientation: 0
-  adPosition: 1
-  adPositionOffset: {x: 0, y: 0}
-  onAdLoaded:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdFailedToLoad:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdOpening:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdClosed:
-    m_PersistentCalls:
-      m_Calls: []
-  onAdLeavingApplication:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1797358929
 Transform:
   m_ObjectHideFlags: 0
